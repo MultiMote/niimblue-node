@@ -1,19 +1,38 @@
 import { EncodedImage, ImageRow, PrintDirection, Utils } from "@mmote/niimbluelib";
-import { Canvas, ImageData, CanvasRenderingContext2D } from "canvas";
+import { PNG } from "pngjs";
+import fs from "fs";
 
 export class ImageEncoder {
-  /** printDirection = "left" rotates image for 90 degrees clockwise */
-  public static encodeCanvas(canvas: Canvas, printDirection: PrintDirection = "left"): EncodedImage {
-    const ctx: CanvasRenderingContext2D = canvas.getContext("2d");
-    const iData: ImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  static loadPng(path: string): Promise<PNG> {
+    return new Promise((resolve, reject) => {
+      fs.createReadStream(path)
+        .pipe(
+          // remove alpha channel and add white background
+          new PNG({
+            colorType: 2,
+            bgColor: {
+              red: 255,
+              green: 255,
+              blue: 255,
+            },
+          })
+        )
+        .on("parsed", function () {
+          resolve(this);
+        })
+        .on("error", (e: Error) => reject(e));
+    });
+  }
+
+  static encodePng(png: PNG, printDirection: PrintDirection = "left"): EncodedImage {
     const rowsData: ImageRow[] = [];
 
-    let cols: number = canvas.width;
-    let rows: number = canvas.height;
+    let cols: number = png.width;
+    let rows: number = png.height;
 
     if (printDirection === "left") {
-      cols = canvas.height;
-      rows = canvas.width;
+      cols = png.height;
+      rows = png.width;
     }
 
     if (cols % 8 !== 0) {
@@ -28,7 +47,7 @@ export class ImageEncoder {
       for (let colOct = 0; colOct < cols / 8; colOct++) {
         let pixelsOctet: number = 0;
         for (let colBit = 0; colBit < 8; colBit++) {
-          if (ImageEncoder.isPixelNonWhite(iData, colOct * 8 + colBit, row, printDirection)) {
+          if (ImageEncoder.isPixelNonWhite(png, colOct * 8 + colBit, row, printDirection)) {
             pixelsOctet |= 1 << (7 - colBit);
             isVoid = false;
             blackPixelsCount++;
@@ -67,21 +86,15 @@ export class ImageEncoder {
     return { cols, rows, rowsData };
   }
 
-  /** printDirection = "left" rotates image to 90 degrees clockwise */
-  public static isPixelNonWhite(
-    iData: ImageData,
-    x: number,
-    y: number,
-    printDirection: PrintDirection = "left"
-  ): boolean {
-    let idx = y * iData.width + x;
+  public static isPixelNonWhite(png: PNG, x: number, y: number, printDirection: PrintDirection = "left"): boolean {
+    let idx = y * png.width + x;
 
     if (printDirection === "left") {
-      idx = (iData.height - 1 - x) * iData.width + y;
+      idx = (png.height - 1 - x) * png.width + y;
     }
 
     idx *= 4;
-    return iData.data[idx] !== 255 || iData.data[idx + 1] !== 255 || iData.data[idx + 2] !== 255;
+    return png.data[idx] !== 255 || png.data[idx + 1] !== 255 || png.data[idx + 2] !== 255;
   }
 
   /**

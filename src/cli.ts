@@ -13,8 +13,8 @@ import {
   EncodedImage,
   printTaskNames,
 } from "@mmote/niimbluelib";
-import { Canvas, CanvasRenderingContext2D, createCanvas, Image, loadImage } from "canvas";
 import { AbstractPrintTask } from "@mmote/niimbluelib/dist/print_tasks/AbstractPrintTask";
+import { PNG } from "pngjs";
 
 type ConnectionType = "serial" | "bluetooth";
 
@@ -69,17 +69,7 @@ const initClient = (transport: ConnectionType, address: string, debug: boolean):
 };
 
 const printImage = async (path: string, options: PrintOptions) => {
-  const image: Image = await loadImage(path);
-  const canvas: Canvas = createCanvas(image.width, image.height);
-  const ctx: CanvasRenderingContext2D = canvas.getContext("2d");
-
-  ctx.fillStyle = "white";
-  ctx.lineWidth = 3;
-
-  // fill background
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-
+  const png: PNG = await ImageEncoder.loadPng(path);
 
   const client: NiimbotAbstractClient = initClient(options.transport, options.address, options.debug);
   await client.connect();
@@ -90,7 +80,7 @@ const printImage = async (path: string, options: PrintOptions) => {
     throw new InvalidArgumentError("Unable to detect print task, please set it manually");
   }
 
-  const encoded: EncodedImage = ImageEncoder.encodeCanvas(canvas, options.direction ?? client.getModelMetadata()?.printDirection);
+  let encoded: EncodedImage = ImageEncoder.encodePng(png, options.direction ?? client.getModelMetadata()?.printDirection);
 
   const printTask: AbstractPrintTask = client.abstraction.newPrintTask(printTaskName, {
     totalPages: options.quantity,
@@ -145,7 +135,7 @@ program
 program
   .command("print")
   .description("Prints image")
-  .argument("<path>", "Image path")
+  .argument("<path>", "PNG image path")
   .option("-d, --debug", "Debug information", false)
   .addOption(
     new Option("-t, --transport <type>", "Transport")
