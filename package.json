@@ -2,6 +2,20 @@
   "name": "@mmote/niimbluelib-headless",
   "version": "0.0.1",
   "description": "Headless clients for niimbluelib",
+  "keywords": [
+    "command-line",
+    "thermal-printer",
+    "label-printer",
+    "niimbot",
+    "niimbot-d110",
+    "niimbot-b1",
+    "bluetooth",
+    "serial"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MultiMote/niimbluelib-headless.git"
+  },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
