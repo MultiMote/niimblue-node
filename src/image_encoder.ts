@@ -1,20 +1,5 @@
-import { Utils } from "@mmote/niimbluelib";
+import { EncodedImage, ImageRow, PrintDirection, Utils } from "@mmote/niimbluelib";
 import { Canvas, ImageData, CanvasRenderingContext2D } from "canvas";
-export type ImageRow = {
-  dataType: "void" | "pixels";
-  rowNumber: number;
-  repeat: number;
-  blackPixelsCount: number;
-  rowData?: Uint8Array;
-};
-
-export type EncodedImage = {
-  cols: number;
-  rows: number;
-  rowsData: ImageRow[];
-};
-
-export type PrintDirection = "left" | "top";
 
 export class ImageEncoder {
   /** printDirection = "left" rotates image for 90 degrees clockwise */
