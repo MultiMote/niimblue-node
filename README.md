@@ -1,4 +1,4 @@
-## NiimBlueLib-Headless
+## NiimBlueLib-Headless [![NPM](https://img.shields.io/npm/v/@mmote/niimbluelib-headless)](https://npmjs.com/package/@mmote/niimbluelib-headless)
 
 [niimbluelib](https://github.com/MultiMote/niimbluelib) client implementations for not-browser use.
 
