@@ -1,6 +1,6 @@
 {
   "name": "@mmote/niimbluelib-headless",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Headless clients for niimbluelib",
   "keywords": [
     "command-line",
