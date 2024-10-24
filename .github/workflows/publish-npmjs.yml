@@ -23,6 +23,9 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
           scope: '@mmote'
 
+      - name: Install bluetooth-serial-port build dependencies
+        run: apt-get update && apt-get install -y build-essential libbluetooth-dev
+
       - name: Install dependencies
         run: yarn install
 
