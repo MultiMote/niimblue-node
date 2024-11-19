@@ -1,11 +1,9 @@
-import { Mutex } from "async-mutex";
 import { SerialPort } from "serialport";
 import {
   ConnectionInfo,
   NiimbotAbstractClient,
   ConnectResult,
   NiimbotPacket,
-  ResponseCommandId,
   Utils,
   ConnectEvent,
   DisconnectEvent,
@@ -17,8 +15,7 @@ import {
 /** WIP. Uses serial communication (serialport lib) */
 export class NiimbotHeadlessSerialClient extends NiimbotAbstractClient {
   private port?: SerialPort = undefined;
-  private mutex: Mutex = new Mutex();
-  private path: string;
+  private readonly path: string;
   private isOpen: boolean = false;
   /** Buffer for fragmented data accumulation */
   private packetBuf: Uint8Array = new Uint8Array();
@@ -36,7 +33,7 @@ export class NiimbotHeadlessSerialClient extends NiimbotAbstractClient {
 
     _port.on("close", () => {
       this.isOpen = false;
-      this.dispatchTypedEvent("disconnect", new DisconnectEvent());
+      this.emit("disconnect", new DisconnectEvent());
     });
 
     _port.on("readable", () => {
@@ -58,7 +55,7 @@ export class NiimbotHeadlessSerialClient extends NiimbotAbstractClient {
       result: this.info.connectResult ?? ConnectResult.FirmwareErrors,
     };
 
-    this.dispatchTypedEvent("connect", new ConnectEvent(result));
+    this.emit("connect", new ConnectEvent(result));
     return result;
   }
 
@@ -68,14 +65,11 @@ export class NiimbotHeadlessSerialClient extends NiimbotAbstractClient {
       const result: Buffer | null = this.port!.read();
       if (result !== null) {
         const chunk = Uint8Array.from(result);
-        // console.info(`<< serial chunk ${Utils.bufToHex(chunk)}`);
-
-        const newBuf = new Uint8Array(this.packetBuf.length + chunk.length);
-        newBuf.set(this.packetBuf, 0);
-        newBuf.set(chunk, this.packetBuf.length);
-        this.packetBuf = newBuf;
+        if (this.debug) {
+          console.info(`<< serial chunk ${Utils.bufToHex(chunk)}`);
+        }
+        this.packetBuf = Utils.u8ArrayAppend(this.packetBuf, chunk);
       } else {
-        // console.log("done");
         break;
       }
 
@@ -83,10 +77,10 @@ export class NiimbotHeadlessSerialClient extends NiimbotAbstractClient {
         const packets: NiimbotPacket[] = NiimbotPacket.fromBytesMultiPacket(this.packetBuf);
 
         if (packets.length > 0) {
-          this.dispatchTypedEvent("rawpacketreceived", new RawPacketReceivedEvent(this.packetBuf));
+          this.emit("rawpacketreceived", new RawPacketReceivedEvent(this.packetBuf));
 
           packets.forEach((p) => {
-            this.dispatchTypedEvent("packetreceived", new PacketReceivedEvent(p));
+            this.emit("packetreceived", new PacketReceivedEvent(p));
           });
 
           this.packetBuf = new Uint8Array();
@@ -106,42 +100,6 @@ export class NiimbotHeadlessSerialClient extends NiimbotAbstractClient {
     return this.isOpen;
   }
 
-  public async sendPacketWaitResponse(packet: NiimbotPacket, timeoutMs: number = 1000): Promise<NiimbotPacket> {
-    if (!this.isConnected()) {
-      throw new Error("Not connected");
-    }
-
-    return this.mutex.runExclusive(async () => {
-      await this.sendPacket(packet, true);
-
-      if (packet.oneWay) {
-        return new NiimbotPacket(ResponseCommandId.Invalid, []); // or undefined is better?
-      }
-
-      return new Promise((resolve, reject) => {
-        let timeout: NodeJS.Timeout | undefined = undefined;
-
-        const listener = (evt: PacketReceivedEvent) => {
-          if (
-            packet.validResponseIds.length === 0 ||
-            packet.validResponseIds.includes(evt.packet.command as ResponseCommandId)
-          ) {
-            clearTimeout(timeout);
-            this.removeEventListener("packetreceived", listener);
-            resolve(evt.packet);
-          }
-        };
-
-        timeout = setTimeout(() => {
-          this.removeEventListener("packetreceived", listener);
-          reject(new Error(`Timeout waiting response (waited for ${Utils.bufToHex(packet.validResponseIds, ", ")})`));
-        }, timeoutMs ?? 1000);
-
-        this.addEventListener("packetreceived", listener);
-      });
-    });
-  }
-
   public async sendRaw(data: Uint8Array, force?: boolean) {
     const send = async () => {
       if (!this.isConnected()) {
@@ -149,7 +107,7 @@ export class NiimbotHeadlessSerialClient extends NiimbotAbstractClient {
       }
       await Utils.sleep(this.packetIntervalMs);
       this.port!.write(Buffer.from(data));
-      this.dispatchTypedEvent("rawpacketsent", new RawPacketSentEvent(data));
+      this.emit("rawpacketsent", new RawPacketSentEvent(data));
     };
 
     if (force) {

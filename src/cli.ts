@@ -43,24 +43,24 @@ const initClient = (transport: ConnectionType, address: string, debug: boolean):
     throw new Error("Invalid transport");
   }
 
-  client.addEventListener("printprogress", (e: PrintProgressEvent) => {
+  client.on("printprogress", (e: PrintProgressEvent) => {
     console.log(`Page ${e.page}/${e.pagesTotal}, Page print ${e.pagePrintProgress}%, Page feed ${e.pageFeedProgress}%`);
   });
 
   if (debug) {
-    client.addEventListener("packetsent", (e: PacketSentEvent) => {
+    client.on("packetsent", (e: PacketSentEvent) => {
       console.log(`>> ${Utils.bufToHex(e.packet.toBytes())} (${RequestCommandId[e.packet.command]})`);
     });
 
-    client.addEventListener("packetreceived", (e: PacketReceivedEvent) => {
+    client.on("packetreceived", (e: PacketReceivedEvent) => {
       console.log(`<< ${Utils.bufToHex(e.packet.toBytes())} (${ResponseCommandId[e.packet.command]})`);
     });
 
-    client.addEventListener("connect", () => {
+    client.on("connect", () => {
       console.log("Connected");
     });
 
-    client.addEventListener("disconnect", () => {
+    client.on("disconnect", () => {
       console.log("Disconnected");
     });
   }
@@ -81,6 +81,10 @@ const printImage = async (path: string, options: PrintOptions) => {
   }
 
   let encoded: EncodedImage = ImageEncoder.encodePng(png, options.direction ?? client.getModelMetadata()?.printDirection);
+
+  if (options.debug) {
+    console.log("Print task:", printTaskName);
+  }
 
   const printTask: AbstractPrintTask = client.abstraction.newPrintTask(printTaskName, {
     totalPages: options.quantity,

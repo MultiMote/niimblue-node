@@ -46,17 +46,17 @@ niimblue-cli help info
 B1 serial:
 
 ```bash
-niimblue-cli print -d -t serial -a COM8 -o top label_15x30.png
+niimblue-cli print -d -t serial -a COM8 -p B1 -o top label_15x30.png
 ```
 
 B1 Bluetooth:
 
 ```bash
-niimblue-cli print -d -t bluetooth -a 07:27:03:17:6E:82 -o top label_15x30.png
+niimblue-cli print -d -t bluetooth -a 07:27:03:17:6E:82 -p B1 -o top label_15x30.png
 ```
 
 D110 Bluetooth:
 
 ```bash
-niimblue-cli print -d -t bluetooth -a 03:26:03:C3:F9:11 -o left label_15x30.png
+niimblue-cli print -d -t bluetooth -a 03:26:03:C3:F9:11 -p D110 -o left label_15x30.png
 ```

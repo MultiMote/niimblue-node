@@ -1,4 +1,3 @@
-import { Mutex } from "async-mutex";
 import { BluetoothSerialPort } from "bluetooth-serial-port";
 import {
   ConnectionInfo,
@@ -16,9 +15,8 @@ import {
 
 // bluetooth-serial-port has no disconnect events
 export class NiimbotHeadlessBluetoothClient extends NiimbotAbstractClient {
-  private mutex: Mutex = new Mutex();
-  private mac: string;
-  private port: BluetoothSerialPort;
+  private readonly mac: string;
+  private readonly port: BluetoothSerialPort;
 
   constructor(mac: string) {
     super();
@@ -68,7 +66,7 @@ export class NiimbotHeadlessBluetoothClient extends NiimbotAbstractClient {
       result: this.info.connectResult ?? ConnectResult.FirmwareErrors,
     };
 
-    this.dispatchTypedEvent("connect", new ConnectEvent(result));
+    this.emit("connect", new ConnectEvent(result));
 
     return result;
   }
@@ -81,8 +79,8 @@ export class NiimbotHeadlessBluetoothClient extends NiimbotAbstractClient {
     const data = Uint8Array.from(buf);
     const packet = NiimbotPacket.fromBytes(data);
 
-    this.dispatchTypedEvent("rawpacketreceived", new RawPacketReceivedEvent(data));
-    this.dispatchTypedEvent("packetreceived", new PacketReceivedEvent(packet));
+    this.emit("rawpacketreceived", new RawPacketReceivedEvent(data));
+    this.emit("packetreceived", new PacketReceivedEvent(packet));
 
     if (!(packet.command in ResponseCommandId)) {
       console.warn(`Unknown response command: 0x${Utils.numberToHex(packet.command)}`);
@@ -99,46 +97,8 @@ export class NiimbotHeadlessBluetoothClient extends NiimbotAbstractClient {
 
     if (this.port.isOpen()) {
       this.port.close();
-      this.dispatchTypedEvent("disconnect", new DisconnectEvent());
+      this.emit("disconnect", new DisconnectEvent());
     }
-  }
-
-  /**
-   * Send packet and wait for response.
-   * If packet.responsePacketCommandId is defined, it will wait for packet with this command id.
-   */
-  public async sendPacketWaitResponse(packet: NiimbotPacket, timeoutMs?: number): Promise<NiimbotPacket> {
-    return this.mutex.runExclusive(async () => {
-      await this.sendPacket(packet, true);
-
-      if (packet.oneWay) {
-        return new NiimbotPacket(ResponseCommandId.Invalid, []); // or undefined is better?
-      }
-
-      // what if response received at this point?
-
-      return new Promise((resolve, reject) => {
-        let timeout: NodeJS.Timeout | undefined = undefined;
-
-        const listener = (evt: PacketReceivedEvent) => {
-          if (
-            packet.validResponseIds.length === 0 ||
-            packet.validResponseIds.includes(evt.packet.command as ResponseCommandId)
-          ) {
-            clearTimeout(timeout);
-            this.removeEventListener("packetreceived", listener);
-            resolve(evt.packet);
-          }
-        };
-
-        timeout = setTimeout(() => {
-          this.removeEventListener("packetreceived", listener);
-          reject(new Error(`Timeout waiting response (waited for ${Utils.bufToHex(packet.validResponseIds, ", ")})`));
-        }, timeoutMs ?? 1000);
-
-        this.addEventListener("packetreceived", listener);
-      });
-    });
   }
 
   public async sendRaw(data: Uint8Array, force?: boolean) {
@@ -156,7 +116,7 @@ export class NiimbotHeadlessBluetoothClient extends NiimbotAbstractClient {
         }
       });
 
-      this.dispatchTypedEvent("rawpacketsent", new RawPacketSentEvent(data));
+      this.emit("rawpacketsent", new RawPacketSentEvent(data));
     };
 
     if (force) {
