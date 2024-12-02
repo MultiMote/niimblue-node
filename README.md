@@ -15,6 +15,12 @@ Usage example:
 
 ### Install
 
+Global (for cli usage):
+
+```bash
+npm i -g @mmote/niimbluelib-headless
+```
+
 [node-gyp](https://www.npmjs.com/package/node-gyp) is required to install [bluetooth-serial-port](https://www.npmjs.com/package/bluetooth-serial-port) dependency.
 It requires working compiler installed on your system.
 
