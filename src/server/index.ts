@@ -46,7 +46,7 @@ const disconnect = async () => {
 };
 
 const connected = async () => {
-  return { connected: client?.isConnected() };
+  return { connected: !!client?.isConnected() };
 };
 
 const info = async () => {
