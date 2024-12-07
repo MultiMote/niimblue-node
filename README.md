@@ -45,6 +45,7 @@ Available options:
 ```bash
 niimblue-cli help print
 niimblue-cli help info
+niimblue-cli help server
 ```
 
 #### Examples
@@ -66,3 +67,23 @@ D110 Bluetooth:
 ```bash
 niimblue-cli print -d -t bluetooth -a 03:26:03:C3:F9:11 -p D110 -o left label_15x30.png
 ```
+
+### Server mode
+
+> [!WARNING]
+>
+> This is experimental feature.
+
+You can start the server with:
+
+```bash
+niimblue-cli server
+```
+
+Enable debug logging, set host and port:
+
+```bash
+niimblue-cli server -d -h 0.0.0.0 -p 3333
+```
+
+See request examples in [server-test.http](server-test.http).

@@ -1,107 +1,12 @@
 import { program, Option, InvalidArgumentError } from "@commander-js/extra-typings";
-import { NiimbotHeadlessSerialClient, NiimbotHeadlessBluetoothClient, ImageEncoder } from ".";
-import {
-  Utils,
-  RequestCommandId,
-  ResponseCommandId,
-  PrintTaskName,
-  NiimbotAbstractClient,
-  PrintProgressEvent,
-  PacketSentEvent,
-  PacketReceivedEvent,
-  PrintDirection,
-  EncodedImage,
-  printTaskNames,
-} from "@mmote/niimbluelib";
-import { AbstractPrintTask } from "@mmote/niimbluelib/dist/print_tasks/AbstractPrintTask";
-import { PNG } from "pngjs";
-
-type ConnectionType = "serial" | "bluetooth";
-
-type PrintOptions = {
-  direction?: PrintDirection;
-  transport: ConnectionType;
-  printTask?: PrintTaskName;
-  address: string;
-  debug: boolean;
-  quantity: number;
-};
+import { NiimbotAbstractClient, PrintDirection, printTaskNames } from "@mmote/niimbluelib";
+import { startServer } from "./server";
+import { TransportType, initClient, connectAndPrintImageFile } from "./service";
 
 type InfoOptions = {
-  transport: ConnectionType;
+  transport: TransportType;
   address: string;
   debug: boolean;
-};
-
-const initClient = (transport: ConnectionType, address: string, debug: boolean): NiimbotAbstractClient => {
-  let client = null;
-  if (transport === "serial") {
-    client = new NiimbotHeadlessSerialClient(address);
-  } else if (transport === "bluetooth") {
-    client = new NiimbotHeadlessBluetoothClient(address);
-  } else {
-    throw new Error("Invalid transport");
-  }
-
-  client.on("printprogress", (e: PrintProgressEvent) => {
-    console.log(`Page ${e.page}/${e.pagesTotal}, Page print ${e.pagePrintProgress}%, Page feed ${e.pageFeedProgress}%`);
-  });
-
-  if (debug) {
-    client.on("packetsent", (e: PacketSentEvent) => {
-      console.log(`>> ${Utils.bufToHex(e.packet.toBytes())} (${RequestCommandId[e.packet.command]})`);
-    });
-
-    client.on("packetreceived", (e: PacketReceivedEvent) => {
-      console.log(`<< ${Utils.bufToHex(e.packet.toBytes())} (${ResponseCommandId[e.packet.command]})`);
-    });
-
-    client.on("connect", () => {
-      console.log("Connected");
-    });
-
-    client.on("disconnect", () => {
-      console.log("Disconnected");
-    });
-  }
-
-  return client;
-};
-
-const printImage = async (path: string, options: PrintOptions) => {
-  const png: PNG = await ImageEncoder.loadPng(path);
-
-  const client: NiimbotAbstractClient = initClient(options.transport, options.address, options.debug);
-  await client.connect();
-
-  const printTaskName: PrintTaskName | undefined = options.printTask ?? client.getPrintTaskType();
-
-  if (printTaskName === undefined) {
-    throw new InvalidArgumentError("Unable to detect print task, please set it manually");
-  }
-
-  let encoded: EncodedImage = ImageEncoder.encodePng(png, options.direction ?? client.getModelMetadata()?.printDirection);
-
-  if (options.debug) {
-    console.log("Print task:", printTaskName);
-  }
-
-  const printTask: AbstractPrintTask = client.abstraction.newPrintTask(printTaskName, {
-    totalPages: options.quantity,
-    statusPollIntervalMs: 100,
-    statusTimeoutMs: 8_000,
-  });
-
-  try {
-    await printTask.printInit();
-    await printTask.printPage(encoded, options.quantity);
-    await printTask.waitForFinished();
-  } catch (e) {
-    console.error(e);
-  }
-
-  await client.abstraction.printEnd();
-  await client.disconnect();
 };
 
 const intOption = (value: string): number => {
@@ -121,8 +26,7 @@ const printerInfo = async (options: InfoOptions) => {
   await client.disconnect();
 };
 
-program
-  .name("niimblue-cli");
+program.name("niimblue-cli");
 
 program
   .command("info")
@@ -131,7 +35,7 @@ program
   .addOption(
     new Option("-t, --transport <type>", "Transport")
       .makeOptionMandatory()
-      .choices(["bluetooth", "serial"] as ConnectionType[])
+      .choices(["bluetooth", "serial"] as TransportType[])
   )
   .requiredOption("-a, --address <string>", "Device bluetooth address or serial port name/path")
   .action(printerInfo);
@@ -144,15 +48,22 @@ program
   .addOption(
     new Option("-t, --transport <type>", "Transport")
       .makeOptionMandatory()
-      .choices(["bluetooth", "serial"] as ConnectionType[])
+      .choices(["bluetooth", "serial"] as TransportType[])
   )
   .requiredOption("-a, --address <string>", "Device bluetooth address or serial port name/path")
-  .addOption(
-    new Option("-o, --direction <dir>", "Print direction")
-      .choices(["left", "top"] as PrintDirection[])
-  )
+  .addOption(new Option("-o, --direction <dir>", "Print direction").choices(["left", "top"] as PrintDirection[]))
   .addOption(new Option("-p, --print-task <type>", "Print task").choices(printTaskNames))
-  .requiredOption("-q, --quantity <number>", "Quantity", intOption, 1)
-  .action(printImage);
+  .requiredOption("-l, --label-type <type number>", "Label type", intOption, 1)
+  .requiredOption("-q, --density <number>", "Density", intOption, 3)
+  .requiredOption("-n, --quantity <number>", "Quantity", intOption, 1)
+  .action(connectAndPrintImageFile);
+
+program
+  .command("server")
+  .description("Start in server mode")
+  .option("-d, --debug", "Debug information", false)
+  .requiredOption("-p, --port <number>", "Listen port", intOption, 5000)
+  .requiredOption("-h, --host <host>", "Listen hostname", "localhost")
+  .action(startServer);
 
 program.parse();

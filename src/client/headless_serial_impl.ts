@@ -12,6 +12,20 @@ import {
   RawPacketSentEvent,
 } from "@mmote/niimbluelib";
 
+// Open SerialPort asynchronously instead of callback
+const serialOpenAsync = (path: string): Promise<SerialPort> => {
+  return new Promise((resolve, reject) => {
+    const p: SerialPort = new SerialPort({ path, baudRate: 115200, endOnClose: true, autoOpen: false });
+    p.open((err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(p);
+      }
+    });
+  });
+};
+
 /** WIP. Uses serial communication (serialport lib) */
 export class NiimbotHeadlessSerialClient extends NiimbotAbstractClient {
   private port?: SerialPort = undefined;
@@ -28,7 +42,8 @@ export class NiimbotHeadlessSerialClient extends NiimbotAbstractClient {
   public async connect(): Promise<ConnectionInfo> {
     await this.disconnect();
 
-    const _port: SerialPort = new SerialPort({ path: this.path, baudRate: 115200, endOnClose: true });
+    const _port: SerialPort = await serialOpenAsync(this.path);
+
     this.isOpen = true;
 
     _port.on("close", () => {
@@ -60,7 +75,6 @@ export class NiimbotHeadlessSerialClient extends NiimbotAbstractClient {
   }
 
   private dataReady() {
-
     while (true) {
       const result: Buffer | null = this.port!.read();
       if (result !== null) {

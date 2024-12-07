@@ -1,27 +1,39 @@
 import { EncodedImage, ImageRow, PrintDirection, Utils } from "@mmote/niimbluelib";
-import { PNG } from "pngjs";
 import fs from "fs";
+import { PNG, PNGOptions } from "pngjs";
+import { Readable } from "stream";
+
+const pngOptions: PNGOptions = {
+  // remove alpha channel and add white background
+  colorType: 2,
+  bgColor: {
+    red: 255,
+    green: 255,
+    blue: 255,
+  },
+};
 
 export class ImageEncoder {
-  static loadPng(path: string): Promise<PNG> {
+  static loadPngStream(stream: Readable): Promise<PNG> {
     return new Promise((resolve, reject) => {
-      fs.createReadStream(path)
-        .pipe(
-          // remove alpha channel and add white background
-          new PNG({
-            colorType: 2,
-            bgColor: {
-              red: 255,
-              green: 255,
-              blue: 255,
-            },
-          })
-        )
+      stream
+        .pipe(new PNG(pngOptions))
         .on("parsed", function () {
           resolve(this);
         })
         .on("error", (e: Error) => reject(e));
     });
+  }
+
+  static async loadPngFile(path: string): Promise<PNG> {
+    const stream = fs.createReadStream(path);
+    return await this.loadPngStream(stream);
+  }
+
+  static async loadPngBase64(b64: string): Promise<PNG> {
+    const buf = Buffer.from(b64, "base64");
+    const stream = Readable.from(buf);
+    return await this.loadPngStream(stream);
   }
 
   static encodePng(png: PNG, printDirection: PrintDirection = "left"): EncodedImage {
