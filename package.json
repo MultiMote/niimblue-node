@@ -1,6 +1,6 @@
 {
   "name": "@mmote/niimbluelib-headless",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Headless clients for niimbluelib. Command line interface, simple REST server are also included",
   "keywords": [
     "command-line",
