@@ -2,6 +2,8 @@
 
 [niimbluelib](https://github.com/MultiMote/niimbluelib) client implementations for not-browser use.
 
+Command line interface, simple REST server are also included.
+
 Tested with:
 
 * Windows 10
@@ -11,7 +13,7 @@ Tested with:
 
 Usage example:
 
-* [src/cli.ts](src/cli.ts)
+* [src/service.ts](src/service.ts)
 
 ### Install
 
@@ -83,7 +85,7 @@ niimblue-cli server
 Enable debug logging, set host and port:
 
 ```bash
-niimblue-cli server -d -h 0.0.0.0 -p 3333
+niimblue-cli server -d -h 0.0.0.0 -p 5000
 ```
 
 See request examples in [server-test.http](server-test.http).
