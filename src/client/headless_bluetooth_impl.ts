@@ -3,13 +3,9 @@ import {
   ConnectionInfo,
   NiimbotAbstractClient,
   ConnectResult,
-  NiimbotPacket,
-  ResponseCommandId,
   Utils,
   ConnectEvent,
   DisconnectEvent,
-  PacketReceivedEvent,
-  RawPacketReceivedEvent,
   RawPacketSentEvent,
 } from "@mmote/niimbluelib";
 
@@ -26,7 +22,7 @@ export class NiimbotHeadlessBluetoothClient extends NiimbotAbstractClient {
 
   private async tryConnect(): Promise<void> {
     return new Promise((resolve, reject) => {
-      const rawPacketReceivedWrapped = this.rawPacketReceived.bind(this);
+      const rawPacketReceivedWrapped = this.processRawPacket.bind(this);
 
       const onConnect = async () => {
         this.port.on("data", rawPacketReceivedWrapped);
@@ -69,22 +65,6 @@ export class NiimbotHeadlessBluetoothClient extends NiimbotAbstractClient {
     this.emit("connect", new ConnectEvent(result));
 
     return result;
-  }
-
-  private rawPacketReceived(buf: Buffer) {
-    if (buf.length === 0) {
-      return;
-    }
-
-    const data = Uint8Array.from(buf);
-    const packet = NiimbotPacket.fromBytes(data);
-
-    this.emit("rawpacketreceived", new RawPacketReceivedEvent(data));
-    this.emit("packetreceived", new PacketReceivedEvent(packet));
-
-    if (!(packet.command in ResponseCommandId)) {
-      console.warn(`Unknown response command: 0x${Utils.numberToHex(packet.command)}`);
-    }
   }
 
   public isConnected(): boolean {

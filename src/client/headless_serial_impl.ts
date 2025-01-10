@@ -3,12 +3,9 @@ import {
   ConnectionInfo,
   NiimbotAbstractClient,
   ConnectResult,
-  NiimbotPacket,
   Utils,
   ConnectEvent,
   DisconnectEvent,
-  PacketReceivedEvent,
-  RawPacketReceivedEvent,
   RawPacketSentEvent,
 } from "@mmote/niimbluelib";
 
@@ -31,8 +28,6 @@ export class NiimbotHeadlessSerialClient extends NiimbotAbstractClient {
   private port?: SerialPort = undefined;
   private readonly path: string;
   private isOpen: boolean = false;
-  /** Buffer for fragmented data accumulation */
-  private packetBuf: Uint8Array = new Uint8Array();
 
   constructor(path: string) {
     super();
@@ -76,31 +71,19 @@ export class NiimbotHeadlessSerialClient extends NiimbotAbstractClient {
 
   private dataReady() {
     while (true) {
-      const result: Buffer | null = this.port!.read();
-      if (result !== null) {
-        const chunk = Uint8Array.from(result);
-        if (this.debug) {
-          console.info(`<< serial chunk ${Utils.bufToHex(chunk)}`);
-        }
-        this.packetBuf = Utils.u8ArrayAppend(this.packetBuf, chunk);
-      } else {
-        break;
-      }
-
       try {
-        const packets: NiimbotPacket[] = NiimbotPacket.fromBytesMultiPacket(this.packetBuf);
+        const result: Buffer | null = this.port!.read();
 
-        if (packets.length > 0) {
-          this.emit("rawpacketreceived", new RawPacketReceivedEvent(this.packetBuf));
-
-          packets.forEach((p) => {
-            this.emit("packetreceived", new PacketReceivedEvent(p));
-          });
-
-          this.packetBuf = new Uint8Array();
+        if (result !== null) {
+          if (this.debug) {
+            console.info(`<< serial chunk ${Utils.bufToHex(result)}`);
+          }
+          this.processRawPacket(result);
+        } else {
+          break;
         }
-      } catch (e) {
-        console.info(`Incomplete packet, ignoring:${Utils.bufToHex(this.packetBuf)}`);
+      } catch (_e) {
+        break;
       }
     }
   }
