@@ -1,7 +1,7 @@
 import { NiimbotAbstractClient } from "@mmote/niimbluelib";
 import { IncomingMessage } from "http";
 import { z } from "zod";
-import { initClient, printBase64Image, PrintOptions, PrintOptionsSchema } from "../service";
+import { initClient, printBase64Image, PrintOptionsSchema } from "../service";
 import { readBodyJson, SimpleServer } from "./simple_server";
 
 let client: NiimbotAbstractClient | null = null;

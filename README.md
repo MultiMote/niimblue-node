@@ -48,6 +48,7 @@ Available options:
 niimblue-cli help print
 niimblue-cli help info
 niimblue-cli help server
+niimblue-cli help flash
 ```
 
 #### Examples
