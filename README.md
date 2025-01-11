@@ -71,6 +71,12 @@ D110 Bluetooth:
 niimblue-cli print -d -t bluetooth -a 03:26:03:C3:F9:11 -p D110 -o left label_15x30.png
 ```
 
+B1 firmware upgrade via serial:
+
+```bash
+niimblue-cli flash -t serial -a COM8 -n 5.15 -f path/to/B1_5.14.bin
+```
+
 ### Server mode
 
 > [!WARNING]
