@@ -33,7 +33,7 @@ See [node-gyp](https://github.com/nodejs/node-gyp?tab=readme-ov-file#on-unix) an
 While development:
 
 ```bash
-yarn cli <options>
+npm run cli <options>
 ```
 
 If installed as package globally:
