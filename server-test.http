@@ -8,7 +8,7 @@ Content-Type: application/json
 
 {
     "transport": "serial",
-    "address": "COM11"
+    "address": "COM8"
 }
 
 ###
@@ -34,6 +34,21 @@ Content-Type: application/json
     "quantity": 1,
     "direction": "top",
     "image": "iVBORw0KGgoAAAANSUhEUgAAAVgAAADICAAAAACIFqZrAAAA1GlDQ1BpY2MAABiVdZBBCwFBHMXfauPioMhBig9gSyk5kuKyHBaFXNZYS3bXNLubfC/fRPkMDs7O3koOWv/pP+/1b34zvQG0lSf8UO8CfhCpodVbzBfLeu6OPLIoooyaLUI5mgym+FvPG7REr0Zy1/9zqaVvnFBQL+y2kCqiPtjmKZL0Woe+dJhafXqTvuB7sfiwyat5J5hNqBV2FS4UbJxRxxox9vAQwaAGzJfONd/cGEcygrskrUi42JFtcBojhEPdcu5weTgnf/SbXdrK/qbKtFov/qczRp9clewAAAAJcEhZcwAACxIAAAsSAdLdfvwAAAIwSURBVHja7d3BTsJQEIZRx/D+rzxGpLRAoRpL/C+ebyGiLsxhHKQsbvWbntE7ArBgBfZpHY4fC8SOtYm1CkZdBdP86reVibUKwAosWLACCxaswIIFK7BgwQosWLACCxaswIIFK7BgwQosWLACCxaswIIFK7BgwQosWLACCxaswIIFK7BgwQosWLACCxaswIIFK7BgwQosWLACCxaswIIFK7BgweoJHSJ+izvHXo18/o2JBbs19Vmnvb0MbIWdo5exY3vB8yJHi73KxMad+pgxsdtow01xPGxNN724f706avmzGY9B+iqY/8SXz/oVvgfyYevmTj/+CtifuHbfjO/F/SVthzhH79h5Z/aM2sfP6uy3+HbS7Ob/u9WLm9VnrsySYe/BnYyzX0yM+wIh/CD4Uf6PvRzZutoTJnanOt7V9ViwgxW/Y0e9hjjmxNbVLdh9XZNlR4RdXh2MlU2G7UdyHb598ye2Vr/QW/Bgt0b2dIW7PluTrAePwR82wnteK2Bf5PNL2+li4vw9E7s9suuL4C17GYTv2Mv3A3pdMfL6YU0PevBz7LfffA14n/z8K4ywY3v3H7QKxg0sWLACCxaswIIFK7BgwQosWLACCxaswIIFK7BgwQosWLACCxaswIIFK7BgwQosWLACCxaswIIFK7BgwQosWLACCxaswIIFK7BgwQosWLACCxaswIIFK7BgwQosWLACm9/5dKTww99NrMA+tRr1bG0TC1Zgwf7fPgCwK0CxpUdwQgAAAABJRU5ErkJggg=="
+}
+
+###
+# Print image with URL
+
+POST {{api}}/print-url HTTP/1.1
+Content-Type: application/json
+
+{
+    "quantity": 1,
+    "direction": "top",
+    "image": "https://i.imgur.com/iXGg9LI.png",
+    "labelW": 240,
+    "labelH": 96,
+    "alignX": "center"
 }
 
 ###

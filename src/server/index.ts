@@ -4,6 +4,7 @@ import { z } from "zod";
 import { initClient, printBase64Image, PrintOptionsSchema } from "../service";
 import { readBodyJson, SimpleServer } from "./simple_server";
 import { NiimbotHeadlessBleClient } from "../client/headless_ble_impl";
+import canvas from "canvas";
 
 let client: NiimbotAbstractClient | null = null;
 let debug: boolean = false;
@@ -26,6 +27,14 @@ const ScanSchema = z.object({
 });
 
 const PrintSchema = PrintOptionsSchema.merge(z.object({ image: z.string() }));
+const PrintUrlSchema = PrintOptionsSchema.merge(
+  z.object({
+    image: z.string(),
+    labelW: z.number(),
+    labelH: z.number(),
+    alignX: z.enum(["left", "center", "right"]).default("left"),
+  })
+);
 
 const index = () => ({ message: "Server is working" });
 
@@ -80,6 +89,52 @@ const print = async (r: IncomingMessage) => {
   return { message: "Printed" };
 };
 
+const printUrl = async (r: IncomingMessage) => {
+  if (!client?.isConnected()) {
+    return [{ error: "Not connected" }, 400];
+  }
+
+  const options = await readBodyJson(r, PrintUrlSchema);
+
+  const c = canvas.createCanvas(options.labelW, options.labelH);
+  const ctx = c.getContext("2d");
+
+  ctx.fillStyle = "#fff";
+  ctx.fillRect(0, 0, c.width, c.height);
+
+  const putImage = new Promise<void>((resolve, reject) => {
+    const img = new canvas.Image();
+    img.src = options.image;
+    img.onload = () => {
+      const imgW = Math.min(img.width, c.height);
+      const imgH = Math.min(img.height, c.height);
+
+      let imgX = 0;
+      if (options.alignX == "center") {
+        imgX = c.width / 2 - imgW / 2;
+      } else if (options.alignX == "right") {
+        imgX = c.width - imgW;
+      }
+
+      ctx.drawImage(img, imgX, 0, imgW, imgH);
+
+      resolve();
+    };
+
+    img.onerror = () => {
+      reject(new Error("Image load error"));
+    };
+  });
+
+  await putImage;
+
+  const imageBase64 = c.toDataURL().split("base64,")[1];
+
+  await printBase64Image(client, imageBase64, { debug, ...options });
+
+  return { message: "Printed" };
+};
+
 const scan = async (r: IncomingMessage) => {
   const options = await readBodyJson(r, ScanSchema);
   if (options.transport !== "ble") {
@@ -107,6 +162,7 @@ export const startServer = (options: ServerOptions) => {
   s.get("/connected", connected);
   s.get("/info", info);
   s.post("/print", print);
+  s.post("/print-url", printUrl);
   s.post("/scan", scan);
 
   s.start(options.host, options.port, () => {
