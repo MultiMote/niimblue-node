@@ -12,7 +12,8 @@ type Route = {
 };
 
 export const writeObj = (response: http.ServerResponse, o: unknown, status: number = 200) => {
-  response.writeHead(status, { "Content-Type": "application/json" });
+  response.setHeader("Content-Type", "application/json");
+  response.writeHead(status);
   response.end(JSON.stringify(o));
 };
 
@@ -50,6 +51,11 @@ export const readBodyJson = async <T>(request: http.IncomingMessage, schema: z.Z
 
 export class SimpleServer {
   private routes: Route[] = [];
+  private corsEnabled: boolean = false;
+
+  enableCors() {
+    this.corsEnabled = true;
+  }
 
   get(path: string, handler: RouteHandler) {
     this.routes.push({ path, handler, method: "GET" });
@@ -68,8 +74,22 @@ export class SimpleServer {
       return;
     }
 
-    try {
+    console.log(`${request.socket.remoteAddress} ${request.method} ${request.url}`);
 
+    if (this.corsEnabled) {
+      response.setHeader("Access-Control-Allow-Origin", "*");
+      response.setHeader("Access-Control-Allow-Headers", "*");
+      response.setHeader("Access-Control-Allow-Methods", "OPTIONS, POST, GET");
+      response.setHeader("Access-Control-Max-Age", 2592000); // 30 days
+
+      if (request.method === "OPTIONS") {
+        response.writeHead(204);
+        response.end();
+        return;
+      }
+    }
+
+    try {
       const route = this.routes.find(
         (r) => r.path === request.url && (r.method === undefined || r.method === request.method)
       );

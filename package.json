@@ -38,13 +38,13 @@
     "typescript": "^5.4.5"
   },
   "dependencies": {
-    "bluetooth-serial-port": "^3.0.2",
-    "serialport": "^12.0.0",
+    "@abandonware/noble": "^1.9.2-26",
     "@commander-js/extra-typings": "^12.1.0",
     "@mmote/niimbluelib": "0.0.1-alpha.22",
     "async-mutex": "^0.5.0",
     "commander": "^12.1.0",
     "pngjs": "^7.0.0",
+    "serialport": "^12.0.0",
     "zod": "^3.23.8"
   }
 }

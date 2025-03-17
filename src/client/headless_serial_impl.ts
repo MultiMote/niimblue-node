@@ -25,19 +25,27 @@ const serialOpenAsync = (path: string): Promise<SerialPort> => {
 
 /** WIP. Uses serial communication (serialport lib) */
 export class NiimbotHeadlessSerialClient extends NiimbotAbstractClient {
-  private port?: SerialPort = undefined;
-  private readonly path: string;
+  private device?: SerialPort;
+  private portName?: string;
   private isOpen: boolean = false;
 
-  constructor(path: string) {
+  constructor() {
     super();
-    this.path = path;
+  }
+
+  /** Set port for connect */
+  public setPort(portName: string) {
+    this.portName = portName;
   }
 
   public async connect(): Promise<ConnectionInfo> {
     await this.disconnect();
 
-    const _port: SerialPort = await serialOpenAsync(this.path);
+    if (!this.portName) {
+      throw new Error("Port not set");
+    }
+
+    const _port: SerialPort = await serialOpenAsync(this.portName);
 
     this.isOpen = true;
 
@@ -50,7 +58,7 @@ export class NiimbotHeadlessSerialClient extends NiimbotAbstractClient {
       this.dataReady();
     });
 
-    this.port = _port;
+    this.device = _port;
 
     try {
       await this.initialNegotiate();
@@ -61,7 +69,7 @@ export class NiimbotHeadlessSerialClient extends NiimbotAbstractClient {
     }
 
     const result: ConnectionInfo = {
-      deviceName: `Serial (${this.path})`,
+      deviceName: `Serial (${this.portName})`,
       result: this.info.connectResult ?? ConnectResult.FirmwareErrors,
     };
 
@@ -72,7 +80,7 @@ export class NiimbotHeadlessSerialClient extends NiimbotAbstractClient {
   private dataReady() {
     while (true) {
       try {
-        const result: Buffer | null = this.port!.read();
+        const result: Buffer | null = this.device!.read();
 
         if (result !== null) {
           if (this.debug) {
@@ -90,7 +98,7 @@ export class NiimbotHeadlessSerialClient extends NiimbotAbstractClient {
 
   public async disconnect() {
     this.stopHeartbeat();
-    this.port?.close();
+    this.device?.close();
   }
 
   public isConnected(): boolean {
@@ -103,7 +111,7 @@ export class NiimbotHeadlessSerialClient extends NiimbotAbstractClient {
         throw new Error("Not connected");
       }
       await Utils.sleep(this.packetIntervalMs);
-      this.port!.write(Buffer.from(data));
+      this.device!.write(Buffer.from(data));
       this.emit("rawpacketsent", new RawPacketSentEvent(data));
     };
 

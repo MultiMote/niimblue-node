@@ -2,6 +2,7 @@ import { InvalidArgumentError } from "@commander-js/extra-typings";
 import {
   AbstractPrintTask,
   EncodedImage,
+  FirmwareProgressEvent,
   LabelType,
   NiimbotAbstractClient,
   PacketReceivedEvent,
@@ -15,9 +16,10 @@ import {
 } from "@mmote/niimbluelib";
 import { PNG } from "pngjs";
 import { z } from "zod";
-import { ImageEncoder, NiimbotHeadlessBluetoothClient, NiimbotHeadlessSerialClient } from ".";
+import { ImageEncoder, NiimbotHeadlessBleClient, NiimbotHeadlessSerialClient } from ".";
+import fs from "fs";
 
-export type TransportType = "serial" | "bluetooth";
+export type TransportType = "serial" | "ble";
 
 const [firstTask, ...otherTasks] = printTaskNames;
 
@@ -40,12 +42,33 @@ export type DebugOptions = {
   debug: boolean;
 };
 
+export type ScanOptions = {
+  transport: TransportType;
+  timeout: number;
+};
+
+export type InfoOptions = {
+  transport: TransportType;
+  address: string;
+  debug: boolean;
+};
+
+export type FirmwareOptions = {
+  transport: TransportType;
+  address: string;
+  file: string;
+  newVersion: string;
+  debug: boolean;
+};
+
 export const initClient = (transport: TransportType, address: string, debug: boolean): NiimbotAbstractClient => {
   let client = null;
   if (transport === "serial") {
-    client = new NiimbotHeadlessSerialClient(address);
-  } else if (transport === "bluetooth") {
-    client = new NiimbotHeadlessBluetoothClient(address);
+    client = new NiimbotHeadlessSerialClient();
+    client.setPort(address);
+  } else if (transport === "ble") {
+    client = new NiimbotHeadlessBleClient();
+    client.setAddress(address);
   } else {
     throw new Error("Invalid transport");
   }
@@ -75,10 +98,7 @@ export const initClient = (transport: TransportType, address: string, debug: boo
   return client;
 };
 
-export const connectAndPrintImageFile = async (
-  path: string,
-  options: PrintOptions & DebugOptions & TransportOptions
-) => {
+export const cliConnectAndPrintImageFile = async (path: string, options: PrintOptions & DebugOptions & TransportOptions) => {
   const client: NiimbotAbstractClient = initClient(options.transport, options.address, options.debug);
   const png: PNG = await ImageEncoder.loadPngFile(path);
 
@@ -89,6 +109,8 @@ export const connectAndPrintImageFile = async (
   } finally {
     await client.disconnect();
   }
+
+  process.exit(0);
 };
 
 export const printBase64Image = async (
@@ -107,10 +129,7 @@ export const printImage = async (client: NiimbotAbstractClient, png: PNG, option
     throw new InvalidArgumentError("Unable to detect print task, please set it manually");
   }
 
-  let encoded: EncodedImage = ImageEncoder.encodePng(
-    png,
-    options.direction ?? client.getModelMetadata()?.printDirection
-  );
+  let encoded: EncodedImage = ImageEncoder.encodePng(png, options.direction ?? client.getModelMetadata()?.printDirection);
 
   if (options.debug) {
     console.log("Print task:", printTaskName);
@@ -133,4 +152,53 @@ export const printImage = async (client: NiimbotAbstractClient, png: PNG, option
   }
 
   await client.abstraction.printEnd();
+};
+
+export const cliScan = async (options: ScanOptions) => {
+  if (options.transport !== "ble") {
+    throw new InvalidArgumentError("Scan is only available for ble");
+  }
+
+  const client = new NiimbotHeadlessBleClient();
+  const devices = await client.scan(options.timeout);
+  devices.forEach((dev) => {
+    console.log(`${dev.address}: ${dev.name}`);
+  });
+  process.exit(0);
+};
+
+export const cliPrinterInfo = async (options: InfoOptions) => {
+  const client: NiimbotAbstractClient = initClient(options.transport, options.address, options.debug);
+  await client.connect();
+  console.log("Printer info:", client.getPrinterInfo());
+  console.log("Model metadata:", client.getModelMetadata());
+  console.log("Detected print task:", client.getPrintTaskType());
+  await client.disconnect();
+  process.exit(0);
+};
+
+export const cliFlashFirmware = async (options: FirmwareOptions) => {
+  const data: Uint8Array = fs.readFileSync(options.file);
+
+  const client: NiimbotAbstractClient = initClient(options.transport, options.address, options.debug);
+  await client.connect();
+
+  client.stopHeartbeat();
+
+  const listener = (e: FirmwareProgressEvent) => {
+    console.log(`Sending ${e.currentChunk}/${e.totalChunks}`);
+  };
+
+  client.on("firmwareprogress", listener);
+
+  try {
+    console.log("Uploading firmware...");
+    await client.abstraction.firmwareUpgrade(data, options.newVersion);
+    console.log("Done, printer will shut down");
+  } finally {
+    client.off("firmwareprogress", listener);
+    await client.disconnect();
+  }
+
+  process.exit(0);
 };

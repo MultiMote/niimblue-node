@@ -18,8 +18,8 @@ POST {{api}}/connect HTTP/1.1
 Content-Type: application/json
 
 {
-    "transport": "bluetooth",
-    "address": "07:27:03:17:6E:82"
+    "transport": "ble",
+    "address": "26:03:03:c3:f9:11"
 }
 
 ###
@@ -37,7 +37,7 @@ Content-Type: application/json
 }
 
 ###
-# Disconect
+# Disconnect
 
 POST {{api}}/disconnect HTTP/1.1
 Content-Type: application/json
@@ -46,10 +46,19 @@ Content-Type: application/json
 # Printer info
 
 GET {{api}}/info HTTP/1.1
-Content-Type: application/json
 
 ###
 # Is connected
 
 GET {{api}}/connected HTTP/1.1
+
+###
+# Scan
+
+POST {{api}}/scan HTTP/1.1
 Content-Type: application/json
+
+{
+    "transport": "ble",
+    "timeout": 3000
+}

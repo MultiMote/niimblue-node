@@ -33,7 +33,7 @@ See [node-gyp](https://github.com/nodejs/node-gyp?tab=readme-ov-file#on-unix) an
 While development:
 
 ```bash
-npm run cli <options>
+npm run cli -- <options>
 ```
 
 If installed as package globally:
@@ -47,6 +47,7 @@ Available options:
 ```bash
 niimblue-cli help print
 niimblue-cli help info
+niimblue-cli help scan
 niimblue-cli help server
 niimblue-cli help flash
 ```
