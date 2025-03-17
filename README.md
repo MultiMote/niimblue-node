@@ -60,16 +60,16 @@ B1 serial:
 niimblue-cli print -d -t serial -a COM8 -p B1 -o top label_15x30.png
 ```
 
-B1 Bluetooth:
+B1 BLE:
 
 ```bash
-niimblue-cli print -d -t bluetooth -a 07:27:03:17:6E:82 -p B1 -o top label_15x30.png
+niimblue-cli print -d -t ble -a 27:03:07:17:6E:82 -p B1 -o top label_15x30.png
 ```
 
-D110 Bluetooth:
+D110 BLE:
 
 ```bash
-niimblue-cli print -d -t bluetooth -a 03:26:03:C3:F9:11 -p D110 -o left label_15x30.png
+niimblue-cli print -d -t ble -a 26:03:03:c3:f9:11 -p D110 -o left label_15x30.png
 ```
 
 B1 firmware upgrade via serial:
@@ -90,10 +90,10 @@ You can start the server with:
 niimblue-cli server
 ```
 
-Enable debug logging, set host and port:
+Enable debug logging, set host and port, enable CORS:
 
 ```bash
-niimblue-cli server -d -h 0.0.0.0 -p 5000
+niimblue-cli server -d -h 0.0.0.0 -p 5000 --cors
 ```
 
 See request examples in [server-test.http](server-test.http).
