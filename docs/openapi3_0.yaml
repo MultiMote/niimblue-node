@@ -21,3 +21,36 @@ paths:
                 properties:
                   connected:
                     type: boolean
+  /connect:
+    post:
+      summary: Check the printer connection status.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                transport:
+                  type: string
+                  enum:
+                    - ble
+                    - serial
+                address:
+                  type: string
+            examples:
+              Serial:
+                value:
+                  transport: "serial"
+                  address: "COM8"
+              BLE:
+                value:
+                  transport: "ble"
+                  address: "26:03:03:c3:f9:11"
+      responses:
+        "200":
+            description: Result
+        "500":
+            description: Connection failure
+
+
