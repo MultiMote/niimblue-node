@@ -23,10 +23,10 @@ Global (for cli usage):
 npm i -g @mmote/niimbluelib-headless
 ```
 
-[node-gyp](https://www.npmjs.com/package/node-gyp) is required to install [bluetooth-serial-port](https://www.npmjs.com/package/bluetooth-serial-port) dependency.
+[node-gyp](https://www.npmjs.com/package/node-gyp) is required to install [noble](https://www.npmjs.com/package/@abandonware/noble) dependency.
 It requires working compiler installed on your system.
 
-See [node-gyp](https://github.com/nodejs/node-gyp?tab=readme-ov-file#on-unix) and [bluetooth-serial-port](https://github.com/eelcocramer/node-bluetooth-serial-port?tab=readme-ov-file#prerequisites-on-linux) installation.
+See [node-gyp](https://github.com/nodejs/node-gyp) and [noble](https://github.com/abandonware/noble) installation.
 
 ### Command-line usage
 
