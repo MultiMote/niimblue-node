@@ -1,0 +1,23 @@
+openapi: 3.0.4
+info:
+  title: niimbluelib-headless server
+  version: "1.0"
+
+servers:
+  - url: http://localhost:5000
+    description: Local server
+
+paths:
+  /connected:
+    get:
+      summary: Check the printer connection status.
+      responses:
+        "200":
+          description: Connection status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  connected:
+                    type: boolean

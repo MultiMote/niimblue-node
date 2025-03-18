@@ -96,4 +96,4 @@ Enable debug logging, set host and port, enable CORS:
 niimblue-cli server -d -h 0.0.0.0 -p 5000 --cors
 ```
 
-See request examples in [server-test.http](server-test.http).
+See request examples in [server-test.http](docs/server-test.http).
