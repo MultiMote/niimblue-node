@@ -5,7 +5,6 @@ import {
   NiimbotAbstractClient,
   PacketReceivedEvent,
   PacketSentEvent,
-  PrintDirection,
   PrintProgressEvent,
   PrintTaskName,
   RequestCommandId,
@@ -20,12 +19,9 @@ import fs from "fs";
 export type TransportType = "serial" | "ble";
 
 export interface PrintOptions {
-  direction?: PrintDirection;
-  printTask?: PrintTaskName;
   quantity?: number;
   labelType?: number;
   density?: number;
-  debug?: boolean;
 }
 
 export const initClient = (transport: TransportType, address: string, debug: boolean): NiimbotAbstractClient => {
@@ -65,19 +61,12 @@ export const initClient = (transport: TransportType, address: string, debug: boo
   return client;
 };
 
-export const printImage = async (client: NiimbotAbstractClient, encoded: EncodedImage, options: PrintOptions) => {
-  const printTaskName: PrintTaskName | undefined = options.printTask ?? client.getPrintTaskType();
-
-  if (printTaskName === undefined) {
-    throw new Error("Unable to detect print task, please set it manually");
-  }
-
-  //   let encoded: EncodedImage = ImageEncoder.encodePng(png, options.direction ?? client.getModelMetadata()?.printDirection);
-
-  if (options.debug) {
-    console.log("Print task:", printTaskName);
-  }
-
+export const printImage = async (
+  client: NiimbotAbstractClient,
+  printTaskName: PrintTaskName,
+  encoded: EncodedImage,
+  options: PrintOptions
+) => {
   const printTask: AbstractPrintTask = client.abstraction.newPrintTask(printTaskName, {
     density: options.density ?? 3,
     labelType: options.labelType ?? LabelType.WithGaps,
@@ -117,8 +106,7 @@ export const loadImageFromUrl = async (url: string): Promise<sharp.Sharp> => {
   return Readable.fromWeb(body).pipe(sharp());
 };
 
-
 export const loadImageFromFile = async (path: string): Promise<sharp.Sharp> => {
-    const stream = fs.createReadStream(path);
-    return stream.pipe(sharp());
-}
+  const stream = fs.createReadStream(path);
+  return stream.pipe(sharp());
+};

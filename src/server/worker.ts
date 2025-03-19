@@ -1,9 +1,11 @@
-import { NiimbotAbstractClient, printTaskNames } from "@mmote/niimbluelib";
+import { NiimbotAbstractClient, PrintDirection, PrintTaskName, printTaskNames } from "@mmote/niimbluelib";
 import { IncomingMessage } from "http";
 import { z } from "zod";
 import { readBodyJson, RestError } from "./simple_server";
 import { NiimbotHeadlessBleClient } from "../client/headless_ble_impl";
-import { initClient } from "../utils";
+import { initClient, loadImageFromBase64, loadImageFromUrl, printImage } from "../utils";
+import sharp from "sharp";
+import { ImageEncoder } from "../image_encoder";
 
 let client: NiimbotAbstractClient | null = null;
 let debug: boolean = false;
@@ -22,7 +24,7 @@ const [firstTask, ...otherTasks] = printTaskNames;
 
 const PrintSchema = z
   .object({
-    direction: z.enum(["left", "top"]).optional(),
+    printDirection: z.enum(["left", "top"]).optional(),
     printTask: z.enum([firstTask, ...otherTasks]).optional(),
     quantity: z.number().min(1).optional(),
     labelType: z.number().min(1).optional(),
@@ -95,7 +97,50 @@ export const print = async (r: IncomingMessage) => {
   assertConnected();
 
   const options = await readBodyJson(r, PrintSchema);
-  //await printBase64Image(client, data.image, { debug, ...data });
+
+  let image: sharp.Sharp;
+
+  if (options.imageBase64 !== undefined) {
+    image = await loadImageFromBase64(options.imageBase64);
+  } else if (options.imageUrl !== undefined) {
+    image = await loadImageFromUrl(options.imageUrl);
+  } else {
+    throw new RestError("Image is not defined", 400);
+  }
+
+  image = image.flatten({ background: "#fff" });
+
+  if (options.labelWidth !== undefined && options.labelHeight !== undefined) {
+    image = image.resize(options.labelWidth, options.labelHeight, {
+      kernel: sharp.kernel.nearest,
+      fit: options.imageFit,
+      position: options.imagePosition,
+      background: "#fff",
+    });
+  }
+
+  image = image.threshold(options.threshold);
+
+  // await image.toFile("tmp.png");
+
+  const printDirection: PrintDirection | undefined = options.printDirection ?? client!.getModelMetadata()?.printDirection;
+  const printTask: PrintTaskName | undefined = options.printTask ?? client!.getPrintTaskType();
+
+  const encoded = await ImageEncoder.encodeImage(image, printDirection);
+
+  if (printTask === undefined) {
+    throw new RestError("Unable to detect print task, please set it manually", 400);
+  }
+
+  if (debug) {
+    console.log("Print task:", printTask);
+  }
+
+  await printImage(client!, printTask, encoded, {
+    quantity: options.quantity,
+    labelType: options.labelType,
+    density: options.density
+  });
 
   return { message: "Printed" };
 };

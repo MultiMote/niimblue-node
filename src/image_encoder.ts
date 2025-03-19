@@ -5,19 +5,19 @@ export class ImageEncoder {
   static async encodeImage(src: sharp.Sharp, printDirection: PrintDirection = "left"): Promise<EncodedImage> {
     const rowsData: ImageRow[] = [];
 
-    const meta: sharp.Metadata = await src.metadata();
-    const buf: Buffer<ArrayBufferLike> = await src.flatten({ background: "#fff" }).toColorspace("b-w").raw().toBuffer();
+    const { data, info } = await src
+      .flatten({ background: "#fff" })
+      .toColorspace("b-w")
+      .raw()
+      .toBuffer({ resolveWithObject: true });
 
-    if (meta.width === undefined || meta.height === undefined) {
-      throw new Error("Can't get image dimensions");
-    }
 
-    let cols: number = meta.width;
-    let rows: number = meta.height;
+    let cols: number = info.width;
+    let rows: number = info.height;
 
     if (printDirection === "left") {
-      cols = meta.height;
-      rows = meta.width;
+      cols = info.height;
+      rows = info.width;
     }
 
     if (cols % 8 !== 0) {
@@ -32,7 +32,7 @@ export class ImageEncoder {
       for (let colOct = 0; colOct < cols / 8; colOct++) {
         let pixelsOctet: number = 0;
         for (let colBit = 0; colBit < 8; colBit++) {
-          if (ImageEncoder.isPixelNonWhite(buf, meta.width, meta.height, colOct * 8 + colBit, row, printDirection)) {
+          if (ImageEncoder.isPixelNonWhite(data, info.width, info.height, colOct * 8 + colBit, row, printDirection)) {
             pixelsOctet |= 1 << (7 - colBit);
             isVoid = false;
             blackPixelsCount++;
