@@ -8,22 +8,9 @@ servers:
     description: Local server
 
 paths:
-  /connected:
-    get:
-      summary: Check the printer connection status.
-      responses:
-        "200":
-          description: Connection status
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  connected:
-                    type: boolean
   /connect:
     post:
-      summary: Check the printer connection status.
+      summary: Connect to the printer.
       requestBody:
         required: true
         content:
@@ -56,20 +43,19 @@ paths:
         "500":
             description: Connection failure
 
-    # printDirection: z.enum(["left", "top"]).optional(),
-    # printTask: z.enum([firstTask, ...otherTasks]).optional(),
-    # quantity: z.number().min(1).optional(),
-    # labelType: z.number().min(1).optional(),
-    # density: z.number().min(1).optional(),
-    # imageBase64: z.string().optional(),
-    # imageUrl: z.string().optional(),
-    # labelWidth: z.number().positive().optional(),
-    # labelHeight: z.number().positive().optional(),
-    # threshold: z.number().min(1).max(255).default(128),
-    # imagePosition: z
-    #   .enum(["centre", "top", "right top", "right", "right bottom", "bottom", "left bottom", "left", "left top"])
-    #   .default("centre"),
-    # imageFit: z.enum(["contain", "cover", "fill", "inside", "outside"]).default("contain"),
+  /connected:
+    get:
+      summary: Check the printer connection status.
+      responses:
+        "200":
+          description: Connection status.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  connected:
+                    type: boolean
 
   /print:
     post:
@@ -118,7 +104,6 @@ paths:
                   example: https://i.imgur.com/TzzVlc4.png
                   description: imageUrl or imageBase64 must be defined
 
-
                 labelWidth:
                   type: number
                   minimum: 8
@@ -150,5 +135,13 @@ paths:
       responses:
         "200":
             description: Success
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      example: Printed
 
 
