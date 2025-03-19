@@ -1,13 +1,13 @@
 import noble from "@abandonware/noble";
 
 import {
-  ConnectionInfo,
-  NiimbotAbstractClient,
-  ConnectResult,
-  Utils,
   ConnectEvent,
+  ConnectionInfo,
+  ConnectResult,
   DisconnectEvent,
+  NiimbotAbstractClient,
   RawPacketSentEvent,
+  Utils,
 } from "@mmote/niimbluelib";
 
 export interface ScanItem {

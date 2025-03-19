@@ -11,10 +11,10 @@ import {
   ResponseCommandId,
   Utils,
 } from "@mmote/niimbluelib";
-import { NiimbotHeadlessSerialClient, NiimbotHeadlessBleClient } from ".";
+import fs from "fs";
 import sharp from "sharp";
 import { Readable } from "stream";
-import fs from "fs";
+import { NiimbotHeadlessBleClient, NiimbotHeadlessSerialClient } from ".";
 
 export type TransportType = "serial" | "ble";
 

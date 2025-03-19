@@ -80,11 +80,7 @@ niimblue-cli flash -t serial -a COM8 -n 5.14 -f path/to/B1_5.14.bin
 
 ### Server mode
 
-> [!WARNING]
->
-> This is experimental feature.
-
-You can start the server with:
+You can start a simple server with:
 
 ```bash
 niimblue-cli server

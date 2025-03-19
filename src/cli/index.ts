@@ -1,8 +1,8 @@
-import { program, Option, InvalidArgumentError } from "@commander-js/extra-typings";
+import { InvalidArgumentError, Option, program } from "@commander-js/extra-typings";
 import { PrintDirection, printTaskNames } from "@mmote/niimbluelib";
-import { cliConnectAndPrintImageFile, cliScan, cliPrinterInfo, cliFlashFirmware } from "./worker";
 import { cliStartServer } from "../server";
 import { TransportType } from "../utils";
+import { cliConnectAndPrintImageFile, cliFlashFirmware, cliPrinterInfo, cliScan } from "./worker";
 
 const intOption = (value: string): number => {
   const parsed = parseInt(value, 10);

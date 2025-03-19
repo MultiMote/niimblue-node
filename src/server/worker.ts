@@ -1,11 +1,11 @@
 import { NiimbotAbstractClient, PrintDirection, PrintTaskName, printTaskNames } from "@mmote/niimbluelib";
 import { IncomingMessage } from "http";
-import { z } from "zod";
-import { readBodyJson, RestError } from "./simple_server";
-import { NiimbotHeadlessBleClient } from "../client/headless_ble_impl";
-import { initClient, loadImageFromBase64, loadImageFromUrl, printImage } from "../utils";
 import sharp from "sharp";
+import { z } from "zod";
+import { NiimbotHeadlessBleClient } from "../client/headless_ble_impl";
 import { ImageEncoder } from "../image_encoder";
+import { initClient, loadImageFromBase64, loadImageFromUrl, printImage } from "../utils";
+import { readBodyJson, RestError } from "./simple_server";
 
 let client: NiimbotAbstractClient | null = null;
 let debug: boolean = false;

@@ -1,9 +1,9 @@
 import { InvalidArgumentError } from "@commander-js/extra-typings";
-import { FirmwareProgressEvent, NiimbotAbstractClient, PrintDirection, PrintTaskName } from "@mmote/niimbluelib";
-import { ImageEncoder, NiimbotHeadlessBleClient } from "..";
+import { FirmwareProgressEvent, LabelType, NiimbotAbstractClient, PrintDirection, PrintTaskName } from "@mmote/niimbluelib";
 import fs from "fs";
-import { initClient, loadImageFromFile, printImage, TransportType } from "../utils";
 import sharp from "sharp";
+import { ImageEncoder, NiimbotHeadlessBleClient } from "..";
+import { initClient, loadImageFromFile, printImage, TransportType } from "../utils";
 
 export interface TransportOptions {
   transport: TransportType;
@@ -33,22 +33,24 @@ export interface PrintOptions {
   printTask?: PrintTaskName;
   printDirection?: PrintDirection;
   quantity: number;
-  labelType: number;
+  labelType: LabelType;
   density: number;
-  threshold: number,
+  threshold: number;
   debug: boolean;
 }
 
 export const cliConnectAndPrintImageFile = async (path: string, options: PrintOptions & TransportOptions) => {
   const client: NiimbotAbstractClient = initClient(options.transport, options.address, options.debug);
 
+  if (options.debug) {
+    console.log("Connecting to", options.transport, options.address);
+  }
+
   await client.connect();
 
   let image: sharp.Sharp = await loadImageFromFile(path);
 
-  image = image
-    .flatten({ background: "#fff" })
-    .threshold(options.threshold);
+  image = image.flatten({ background: "#fff" }).threshold(options.threshold);
 
   const printDirection: PrintDirection | undefined = options.printDirection ?? client.getModelMetadata()?.printDirection;
   const printTask: PrintTaskName | undefined = options.printTask ?? client.getPrintTaskType();
