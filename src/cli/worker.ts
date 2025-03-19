@@ -2,7 +2,7 @@ import { InvalidArgumentError } from "@commander-js/extra-typings";
 import { FirmwareProgressEvent, LabelType, NiimbotAbstractClient, PrintDirection, PrintTaskName } from "@mmote/niimbluelib";
 import fs from "fs";
 import sharp from "sharp";
-import { ImageEncoder, NiimbotHeadlessBleClient } from "..";
+import { ImageEncoder, NiimbotHeadlessBleClient, NiimbotHeadlessSerialClient } from "..";
 import { initClient, loadImageFromFile, printImage, TransportType } from "../utils";
 
 export interface TransportOptions {
@@ -79,15 +79,16 @@ export const cliConnectAndPrintImageFile = async (path: string, options: PrintOp
 };
 
 export const cliScan = async (options: ScanOptions) => {
-  if (options.transport !== "ble") {
-    throw new InvalidArgumentError("Scan is only available for ble");
+
+  if(options.transport === "ble") {
+    const devices = await NiimbotHeadlessBleClient.scan(options.timeout);
+    devices.forEach((dev) => console.log(`${dev.address}: ${dev.name}`));
+  }else if(options.transport === "serial") {
+    const devices = await NiimbotHeadlessSerialClient.scan();
+    devices.forEach((dev) => console.log(`${dev.address}: ${dev.name}`));
   }
 
-  const client = new NiimbotHeadlessBleClient();
-  const devices = await client.scan(options.timeout);
-  devices.forEach((dev) => {
-    console.log(`${dev.address}: ${dev.name}`);
-  });
+
   process.exit(0);
 };
 

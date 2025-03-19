@@ -9,6 +9,11 @@ import {
   RawPacketSentEvent,
 } from "@mmote/niimbluelib";
 
+export interface ScanItem {
+  address: string;
+  name: string;
+}
+
 // Open SerialPort asynchronously instead of callback
 const serialOpenAsync = (path: string): Promise<SerialPort> => {
   return new Promise((resolve, reject) => {
@@ -120,5 +125,25 @@ export class NiimbotHeadlessSerialClient extends NiimbotAbstractClient {
     } else {
       await this.mutex.runExclusive(send);
     }
+  }
+
+  public static async scan(): Promise<ScanItem[]> {
+    const ports = await SerialPort.list();
+
+    return ports.map((p) => {
+      let name: string = "unknown";
+      let pRaw = p as any;
+
+      if (pRaw["friendlyName"] !== undefined) {
+        name = pRaw["friendlyName"] as string;
+      } else if (p.pnpId !== undefined) {
+        name = p.pnpId;
+      }
+
+      return {
+        name,
+        address: p.path,
+      };
+    });
   }
 }

@@ -6,6 +6,7 @@ import { NiimbotHeadlessBleClient } from "../client/headless_ble_impl";
 import { ImageEncoder } from "../image_encoder";
 import { initClient, loadImageFromBase64, loadImageFromUrl, printImage } from "../utils";
 import { readBodyJson, RestError } from "./simple_server";
+import { NiimbotHeadlessSerialClient } from "../client/headless_serial_impl";
 
 let client: NiimbotAbstractClient | null = null;
 let debug: boolean = false;
@@ -139,7 +140,7 @@ export const print = async (r: IncomingMessage) => {
   await printImage(client!, printTask, encoded, {
     quantity: options.quantity,
     labelType: options.labelType,
-    density: options.density
+    density: options.density,
   });
 
   return { message: "Printed" };
@@ -148,12 +149,11 @@ export const print = async (r: IncomingMessage) => {
 export const scan = async (r: IncomingMessage) => {
   const options = await readBodyJson(r, ScanSchema);
 
-  if (options.transport !== "ble") {
-    throw new RestError("Scan is only available for ble", 400);
+  if (options.transport === "ble") {
+    return { devices: await NiimbotHeadlessBleClient.scan(options.timeout) };
+  } else if (options.transport === "serial") {
+    return { devices: await NiimbotHeadlessSerialClient.scan() };
   }
 
-  const c = new NiimbotHeadlessBleClient();
-  const devices = await c.scan(options.timeout);
-
-  return { devices };
+  throw new RestError("Invalid transport", 400);
 };
