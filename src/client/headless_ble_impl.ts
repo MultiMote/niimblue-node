@@ -135,6 +135,13 @@ export class NiimbotHeadlessBleClient extends NiimbotAbstractClient {
       throw new Error("Unable to find suitable channel characteristic");
     }
 
+    periph.on("disconnect", () => {
+      this.stopHeartbeat();
+      this.emit("disconnect", new DisconnectEvent());
+      this.device = undefined;
+      this.channel = undefined;
+    });
+
     channelCharacteristic.on("read", (data: Buffer, isNotification: boolean) => {
       if (isNotification) this.processRawPacket(new Uint8Array(data));
     });
