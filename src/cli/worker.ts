@@ -1,24 +1,25 @@
 import { InvalidArgumentError } from "@commander-js/extra-typings";
-import { FirmwareProgressEvent, NiimbotAbstractClient } from "@mmote/niimbluelib";
-import { NiimbotHeadlessBleClient } from "..";
+import { FirmwareProgressEvent, NiimbotAbstractClient, PrintDirection, PrintTaskName } from "@mmote/niimbluelib";
+import { ImageEncoder, NiimbotHeadlessBleClient } from "..";
 import fs from "fs";
-import { initClient, PrintOptions, TransportType } from "../utils";
+import { initClient, loadImageFromFile, printImage, TransportType } from "../utils";
+import sharp from "sharp";
 
 export interface TransportOptions {
   transport: TransportType;
   address: string;
-};
+}
 
 export interface ScanOptions {
   transport: TransportType;
   timeout: number;
-};
+}
 
 export interface InfoOptions {
   transport: TransportType;
   address: string;
   debug: boolean;
-};
+}
 
 export interface FirmwareOptions {
   transport: TransportType;
@@ -26,26 +27,53 @@ export interface FirmwareOptions {
   file: string;
   newVersion: string;
   debug: boolean;
-};
+}
+
+export interface PrintOptions {
+  printTask?: PrintTaskName;
+  printDirection?: PrintDirection;
+  quantity: number;
+  labelType: number;
+  density: number;
+  threshold: number,
+  debug: boolean;
+}
 
 export const cliConnectAndPrintImageFile = async (path: string, options: PrintOptions & TransportOptions) => {
-  const client: NiimbotAbstractClient = initClient(options.transport, options.address, !!options.debug);
-  // const png: PNG = await ImageEncoder.loadPngFile(path);
+  const client: NiimbotAbstractClient = initClient(options.transport, options.address, options.debug);
 
   await client.connect();
 
+  let image: sharp.Sharp = await loadImageFromFile(path);
+
+  image = image
+    .flatten({ background: "#fff" })
+    .threshold(options.threshold);
+
+  const printDirection: PrintDirection | undefined = options.printDirection ?? client.getModelMetadata()?.printDirection;
+  const printTask: PrintTaskName | undefined = options.printTask ?? client.getPrintTaskType();
+
+  const encoded = await ImageEncoder.encodeImage(image, printDirection);
+
+  if (printTask === undefined) {
+    throw new Error("Unable to detect print task, please set it manually");
+  }
+
+  if (options.debug) {
+    console.log("Print task:", printTask);
+  }
+
   try {
-    // await printImage(client, png, options);
+    await printImage(client, printTask, encoded, {
+      quantity: options.quantity,
+      labelType: options.labelType,
+      density: options.density,
+    });
   } finally {
     await client.disconnect();
   }
 
   process.exit(0);
-};
-
-export const printBase64Image = async (client: NiimbotAbstractClient, b64: string, options: PrintOptions) => {
-  // const png: PNG = await ImageEncoder.loadPngBase64(b64);
-  // await printImage(client, png, options);
 };
 
 export const cliScan = async (options: ScanOptions) => {
