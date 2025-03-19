@@ -10,6 +10,12 @@
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     />
+
+    <style>
+      html, body {
+        margin: 0;
+      }
+    </style>
   </head>
 
   <body>
@@ -36,6 +42,7 @@
           presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
           plugins: [SwaggerUIBundle.plugins.DownloadUrl],
           layout: "StandaloneLayout",
+          validatorUrl: null
         });
       };
     </script>

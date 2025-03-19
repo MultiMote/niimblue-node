@@ -13,6 +13,9 @@ import {
   Utils,
 } from "@mmote/niimbluelib";
 import { NiimbotHeadlessSerialClient, NiimbotHeadlessBleClient } from ".";
+import sharp from "sharp";
+import { Readable } from "stream";
+import fs from "fs";
 
 export type TransportType = "serial" | "ble";
 
@@ -93,3 +96,29 @@ export const printImage = async (client: NiimbotAbstractClient, encoded: Encoded
 
   await client.abstraction.printEnd();
 };
+
+export const loadImageFromBase64 = async (b64: string): Promise<sharp.Sharp> => {
+  const buf = Buffer.from(b64, "base64");
+  const stream = Readable.from(buf);
+  return stream.pipe(sharp());
+};
+
+export const loadImageFromUrl = async (url: string): Promise<sharp.Sharp> => {
+  const { body, ok, status } = await fetch(url);
+
+  if (!ok) {
+    throw new Error(`Can't fetch image, error ${status}`);
+  }
+
+  if (body === null) {
+    throw new Error("Body is null");
+  }
+
+  return Readable.fromWeb(body).pipe(sharp());
+};
+
+
+export const loadImageFromFile = async (path: string): Promise<sharp.Sharp> => {
+    const stream = fs.createReadStream(path);
+    return stream.pipe(sharp());
+}
