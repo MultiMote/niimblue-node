@@ -20,7 +20,7 @@ export type TransportType = "serial" | "ble";
 
 export interface PrintOptions {
   quantity?: number;
-  labelType?: number;
+  labelType?: LabelType;
   density?: number;
 }
 

@@ -30,6 +30,9 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - transport
+                - address
               properties:
                 transport:
                   type: string
@@ -52,5 +55,100 @@ paths:
             description: Result
         "500":
             description: Connection failure
+
+    # printDirection: z.enum(["left", "top"]).optional(),
+    # printTask: z.enum([firstTask, ...otherTasks]).optional(),
+    # quantity: z.number().min(1).optional(),
+    # labelType: z.number().min(1).optional(),
+    # density: z.number().min(1).optional(),
+    # imageBase64: z.string().optional(),
+    # imageUrl: z.string().optional(),
+    # labelWidth: z.number().positive().optional(),
+    # labelHeight: z.number().positive().optional(),
+    # threshold: z.number().min(1).max(255).default(128),
+    # imagePosition: z
+    #   .enum(["centre", "top", "right top", "right", "right bottom", "bottom", "left bottom", "left", "left top"])
+    #   .default("centre"),
+    # imageFit: z.enum(["contain", "cover", "fill", "inside", "outside"]).default("contain"),
+
+  /print:
+    post:
+      summary: Print image.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                printDirection:
+                  type: string
+                  enum: ["left", "top"]
+                  default: left
+
+                printTask:
+                  type: string
+                  example: B1
+
+                quantity:
+                  type: number
+                  minimum: 1
+                  default: 1
+
+                labelType:
+                  type: number
+                  minimum: 1
+                  default: 1
+
+                density:
+                  type: number
+                  minimum: 1
+                  default: 3
+
+                imageBase64:
+                  type: string
+                  format: byte
+                  default: null
+                  description: imageUrl or imageBase64 must be defined
+
+                imageUrl:
+                  type: string
+                  format: uri
+                  default: null
+                  example: https://i.imgur.com/TzzVlc4.png
+                  description: imageUrl or imageBase64 must be defined
+
+
+                labelWidth:
+                  type: number
+                  minimum: 8
+                  default: null
+
+                labelHeight:
+                  type: number
+                  minimum: 8
+                  default: null
+
+                threshold:
+                  type: number
+                  minimum: 1
+                  maximum: 255
+                  default: 128
+
+                imagePosition:
+                  type: string
+                  enum: ["centre", "top", "right top", "right", "right bottom", "bottom", "left bottom", "left", "left top"]
+                  default: centre
+                  description: See [sharp resize options.position](https://sharp.pixelplumbing.com/api-resize)
+
+                imageFit:
+                  type: string
+                  enum: ["contain", "cover", "fill", "inside", "outside"]
+                  default: contain
+                  description: See [sharp resize options.fit](https://sharp.pixelplumbing.com/api-resize)
+
+      responses:
+        "200":
+            description: Success
 
 

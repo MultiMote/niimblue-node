@@ -1,5 +1,11 @@
 import { InvalidArgumentError } from "@commander-js/extra-typings";
-import { FirmwareProgressEvent, LabelType, NiimbotAbstractClient, PrintDirection, PrintTaskName } from "@mmote/niimbluelib";
+import {
+  FirmwareProgressEvent,
+  LabelType,
+  NiimbotAbstractClient,
+  PrintDirection,
+  PrintTaskName,
+} from "@mmote/niimbluelib";
 import fs from "fs";
 import sharp from "sharp";
 import { ImageEncoder, NiimbotHeadlessBleClient, NiimbotHeadlessSerialClient } from "..";
@@ -79,15 +85,13 @@ export const cliConnectAndPrintImageFile = async (path: string, options: PrintOp
 };
 
 export const cliScan = async (options: ScanOptions) => {
-
-  if(options.transport === "ble") {
+  if (options.transport === "ble") {
     const devices = await NiimbotHeadlessBleClient.scan(options.timeout);
     devices.forEach((dev) => console.log(`${dev.address}: ${dev.name}`));
-  }else if(options.transport === "serial") {
+  } else if (options.transport === "serial") {
     const devices = await NiimbotHeadlessSerialClient.scan();
     devices.forEach((dev) => console.log(`${dev.address}: ${dev.name}`));
   }
-
 
   process.exit(0);
 };

@@ -1,4 +1,4 @@
-import { NiimbotAbstractClient, PrintDirection, PrintTaskName, printTaskNames } from "@mmote/niimbluelib";
+import { LabelType, NiimbotAbstractClient, PrintDirection, PrintTaskName, printTaskNames } from "@mmote/niimbluelib";
 import { IncomingMessage } from "http";
 import sharp from "sharp";
 import { z } from "zod";
@@ -27,9 +27,9 @@ const PrintSchema = z
   .object({
     printDirection: z.enum(["left", "top"]).optional(),
     printTask: z.enum([firstTask, ...otherTasks]).optional(),
-    quantity: z.number().min(1).optional(),
-    labelType: z.number().min(1).optional(),
-    density: z.number().min(1).optional(),
+    quantity: z.number().min(1).default(1),
+    labelType: z.number().min(1).default(LabelType.WithGaps),
+    density: z.number().min(1).default(3),
     imageBase64: z.string().optional(),
     imageUrl: z.string().optional(),
     labelWidth: z.number().positive().optional(),
