@@ -10,8 +10,13 @@
     <div id="app"></div>
     <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
     <script>
+      // https://github.com/scalar/scalar/blob/main/documentation/configuration.md
       Scalar.createApiReference("#app", {
         url: "openapi3_0.yaml",
+        defaultHttpClient: {
+          targetKey: 'js',
+          clientKey: 'fetch',
+        }
       });
     </script>
   </body>
