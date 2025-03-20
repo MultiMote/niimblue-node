@@ -26,6 +26,12 @@ npm i -g @mmote/niimbluelib-headless
 [node-gyp](https://www.npmjs.com/package/node-gyp) is required to install [noble](https://www.npmjs.com/package/@abandonware/noble) dependency.
 It requires working compiler installed on your system.
 
+Windows requirements:
+
+* [MS Build tools 2019+](https://visualstudio.microsoft.com/downloads/?q=build+tools)
+  - C++ build tools with `Windows SDK >=22000` must be installed
+* Python 3
+
 See [node-gyp](https://github.com/nodejs/node-gyp) and [noble](https://github.com/abandonware/noble) installation.
 
 ### Command-line usage
