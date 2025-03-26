@@ -27,5 +27,9 @@ export const cliStartServer = (options: ServerOptions) => {
 
   s.start(options.host, options.port, () => {
     console.log(`Server is listening ${options.host}:${options.port}`);
+    if (options.cors) {
+      console.log("CORS enabled");
+    }
+
   });
 };

@@ -40,6 +40,16 @@ export const initClient = (transport: TransportType, address: string, debug: boo
     console.log(`Page ${e.page}/${e.pagesTotal}, Page print ${e.pagePrintProgress}%, Page feed ${e.pageFeedProgress}%`);
   });
 
+  client.on("heartbeatfailed", (e) => {
+    const maxFails = 5;
+    console.warn(`Heartbeat failed ${e.failedAttempts}/${maxFails}`);
+
+    if (e.failedAttempts >= maxFails) {
+      console.warn("Disconnecting");
+      client.disconnect();
+    }
+  });
+
   if (debug) {
     client.on("packetsent", (e: PacketSentEvent) => {
       console.log(`>> ${Utils.bufToHex(e.packet.toBytes())} (${RequestCommandId[e.packet.command]})`);
