@@ -77,7 +77,7 @@ export const disconnect = async () => {
 
   await client!.disconnect();
   client = null;
-  return [{ message: "Disconnected" }];
+  return { message: "Disconnected" };
 };
 
 export const connected = async () => {
@@ -88,7 +88,7 @@ export const info = async () => {
   assertConnected();
 
   return {
-    printerIInfo: client!.getPrinterInfo(),
+    printerInfo: client!.getPrinterInfo(),
     modelMetadata: client!.getModelMetadata(),
     detectedPrintTask: client!.getPrintTaskType(),
   };
