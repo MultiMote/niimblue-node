@@ -39,7 +39,7 @@ See [node-gyp](https://github.com/nodejs/node-gyp) and [noble](https://github.co
 While development:
 
 ```bash
-npm run cli -- <options>
+npm run cli --- <options>
 ```
 
 If installed as package globally:
