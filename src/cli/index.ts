@@ -58,7 +58,7 @@ program
   .option("-w, --label-width <number>", "Label width", intOption)
   .option("-h, --label-height <number>", "Label height", intOption)
   .addOption(
-    new Option("-f, --image-fit <dir>", "Image fit while resizing").choices([
+    new Option("-f, --image-fit <dir>", "Image fit while resizing (label-width and label-height must be set)").choices([
       "contain",
       "cover",
       "fill",
@@ -67,7 +67,7 @@ program
     ] as SharpImageFit[])
   )
   .addOption(
-    new Option("-p, --image-position <dir>", "Image position while resizing").choices([
+    new Option("-p, --image-position <dir>", "Image position while resizing (label-width and label-height must be set)").choices([
       "left",
       "top",
       "centre",

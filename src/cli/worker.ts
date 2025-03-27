@@ -9,6 +9,7 @@ import fs from "fs";
 import sharp from "sharp";
 import { ImageEncoder, NiimbotHeadlessBleClient, NiimbotHeadlessSerialClient } from "..";
 import { initClient, loadImageFromFile, printImage, TransportType } from "../utils";
+import { InvalidArgumentError } from "@commander-js/extra-typings";
 
 export type SharpImageFit = "contain" | "cover" | "fill" | "inside" | "outside";
 export type SharpImagePosition =
@@ -80,6 +81,8 @@ export const cliConnectAndPrintImageFile = async (path: string, options: PrintOp
       position: options.imagePosition,
       background: "#fff",
     });
+  } else if(options.imageFit !== undefined || options.imagePosition !== undefined) {
+    throw new InvalidArgumentError("label-width and label-height must be set");
   }
 
   const printDirection: PrintDirection | undefined = options.printDirection ?? client.getModelMetadata()?.printDirection;
