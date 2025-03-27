@@ -2,7 +2,14 @@ import { InvalidArgumentError, Option, program } from "@commander-js/extra-typin
 import { PrintDirection, printTaskNames } from "@mmote/niimbluelib";
 import { cliStartServer } from "../server";
 import { TransportType } from "../utils";
-import { cliConnectAndPrintImageFile, cliFlashFirmware, cliPrinterInfo, cliScan } from "./worker";
+import {
+  cliConnectAndPrintImageFile,
+  cliFlashFirmware,
+  cliPrinterInfo,
+  cliScan,
+  SharpImageFit,
+  SharpImagePosition,
+} from "./worker";
 
 const intOption = (value: string): number => {
   const parsed = parseInt(value, 10);
@@ -48,6 +55,30 @@ program
   .requiredOption("-q, --density <number>", "Density", intOption, 3)
   .requiredOption("-n, --quantity <number>", "Quantity", intOption, 1)
   .requiredOption("-x, --threshold <number>", "Threshold", intOption, 128)
+  .option("-w, --label-width <number>", "Label width", intOption)
+  .option("-h, --label-height <number>", "Label height", intOption)
+  .addOption(
+    new Option("-f, --image-fit <dir>", "Image fit while resizing").choices([
+      "contain",
+      "cover",
+      "fill",
+      "inside",
+      "outside",
+    ] as SharpImageFit[])
+  )
+  .addOption(
+    new Option("-p, --image-position <dir>", "Image position while resizing").choices([
+      "left",
+      "top",
+      "centre",
+      "right top",
+      "right",
+      "right bottom",
+      "bottom",
+      "left bottom",
+      "left top",
+    ] as SharpImagePosition[])
+  )
   .action(cliConnectAndPrintImageFile);
 
 program

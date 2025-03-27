@@ -1,4 +1,3 @@
-import { InvalidArgumentError } from "@commander-js/extra-typings";
 import {
   FirmwareProgressEvent,
   LabelType,
@@ -10,6 +9,18 @@ import fs from "fs";
 import sharp from "sharp";
 import { ImageEncoder, NiimbotHeadlessBleClient, NiimbotHeadlessSerialClient } from "..";
 import { initClient, loadImageFromFile, printImage, TransportType } from "../utils";
+
+export type SharpImageFit = "contain" | "cover" | "fill" | "inside" | "outside";
+export type SharpImagePosition =
+  | "left"
+  | "top"
+  | "centre"
+  | "right top"
+  | "right"
+  | "right bottom"
+  | "bottom"
+  | "left bottom"
+  | "left top";
 
 export interface TransportOptions {
   transport: TransportType;
@@ -42,6 +53,10 @@ export interface PrintOptions {
   labelType: LabelType;
   density: number;
   threshold: number;
+  labelWidth?: number;
+  labelHeight?: number;
+  imageFit?: SharpImageFit;
+  imagePosition?: SharpImagePosition;
   debug: boolean;
 }
 
@@ -57,6 +72,15 @@ export const cliConnectAndPrintImageFile = async (path: string, options: PrintOp
   let image: sharp.Sharp = await loadImageFromFile(path);
 
   image = image.flatten({ background: "#fff" }).threshold(options.threshold);
+
+  if (options.labelWidth !== undefined && options.labelHeight !== undefined) {
+    image = image.resize(options.labelWidth, options.labelHeight, {
+      kernel: sharp.kernel.nearest,
+      fit: options.imageFit,
+      position: options.imagePosition,
+      background: "#fff",
+    });
+  }
 
   const printDirection: PrintDirection | undefined = options.printDirection ?? client.getModelMetadata()?.printDirection;
   const printTask: PrintTaskName | undefined = options.printTask ?? client.getPrintTaskType();
