@@ -56,8 +56,8 @@ export interface PrintOptions {
   threshold: number;
   labelWidth?: number;
   labelHeight?: number;
-  imageFit?: SharpImageFit;
-  imagePosition?: SharpImagePosition;
+  imageFit: SharpImageFit;
+  imagePosition: SharpImagePosition;
   debug: boolean;
 }
 

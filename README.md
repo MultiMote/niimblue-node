@@ -60,12 +60,6 @@ niimblue-cli help flash
 
 #### Examples
 
-B1 serial:
-
-```bash
-niimblue-cli print -d -t serial -a COM8 -p B1 -o top label_15x30.png
-```
-
 B1 BLE:
 
 ```bash
@@ -76,6 +70,12 @@ D110 BLE:
 
 ```bash
 niimblue-cli print -d -t ble -a 26:03:03:c3:f9:11 -p D110 -o left label_15x30.png
+```
+
+B1 serial, long parameter names (will resize image to fit 50x30 label keeping aspect ration):
+
+```bash
+niimblue-cli print --debug --transport serial --address COM8 --print-task B1 --print-direction top --label-width 384 --label-height 240 label_15x30.png
 ```
 
 B1 firmware upgrade via serial:
