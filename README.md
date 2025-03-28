@@ -63,7 +63,7 @@ niimblue-cli help flash
 B1 BLE:
 
 ```bash
-niimblue-cli print -d -t ble -a 27:03:07:17:6E:82 -p B1 -o top label_15x30.png
+niimblue-cli print -d -t ble -a 27:03:07:17:6e:82 -p B1 -o top label_15x30.png
 ```
 
 D110 BLE:

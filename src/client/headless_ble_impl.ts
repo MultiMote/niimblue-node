@@ -26,7 +26,7 @@ export class NiimbotHeadlessBleClient extends NiimbotAbstractClient {
 
   /** Set device mac address for connect */
   public setAddress(address: string) {
-    this.addr = address;
+    this.addr = address.toLowerCase();
   }
 
   public static async waitAdapterReady(): Promise<void> {
