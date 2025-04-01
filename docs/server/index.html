@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>niimbluelib-headless server API Reference</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
+
+  <body>
+    <div id="app"></div>
+    <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
+    <script>
+      // https://github.com/scalar/scalar/blob/main/documentation/configuration.md
+      Scalar.createApiReference("#app", {
+        url: "openapi3_0.yaml",
+        defaultHttpClient: {
+          targetKey: 'js',
+          clientKey: 'fetch',
+        }
+      });
+    </script>
+  </body>
+</html>

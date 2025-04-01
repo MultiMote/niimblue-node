@@ -1,13 +1,13 @@
 import noble from "@abandonware/noble";
 
 import {
-  ConnectionInfo,
-  NiimbotAbstractClient,
-  ConnectResult,
-  Utils,
   ConnectEvent,
+  ConnectionInfo,
+  ConnectResult,
   DisconnectEvent,
+  NiimbotAbstractClient,
   RawPacketSentEvent,
+  Utils,
 } from "@mmote/niimbluelib";
 
 export interface ScanItem {
@@ -15,7 +15,6 @@ export interface ScanItem {
   name: string;
 }
 
-// bluetooth-serial-port has no disconnect events
 export class NiimbotHeadlessBleClient extends NiimbotAbstractClient {
   private addr: string = "";
   private device: noble.Peripheral | undefined;
@@ -27,10 +26,10 @@ export class NiimbotHeadlessBleClient extends NiimbotAbstractClient {
 
   /** Set device mac address for connect */
   public setAddress(address: string) {
-    this.addr = address;
+    this.addr = address.toLowerCase();
   }
 
-  private async waitAdapterReady(): Promise<void> {
+  public static async waitAdapterReady(): Promise<void> {
     if (noble._state === "poweredOn") {
       return;
     }
@@ -54,8 +53,8 @@ export class NiimbotHeadlessBleClient extends NiimbotAbstractClient {
     });
   }
 
-  public async scan(timeoutMs: number = 5000): Promise<ScanItem[]> {
-    await this.waitAdapterReady();
+  public static async scan(timeoutMs: number = 5000): Promise<ScanItem[]> {
+    await NiimbotHeadlessBleClient.waitAdapterReady();
 
     return new Promise((resolve, reject) => {
       const peripherals: ScanItem[] = [];
@@ -83,7 +82,7 @@ export class NiimbotHeadlessBleClient extends NiimbotAbstractClient {
   }
 
   private async getDevice(address: string, timeoutMs: number = 5000): Promise<noble.Peripheral> {
-    await this.waitAdapterReady();
+    await NiimbotHeadlessBleClient.waitAdapterReady();
 
     return new Promise((resolve, reject) => {
       let timer: NodeJS.Timeout | undefined;
@@ -134,6 +133,13 @@ export class NiimbotHeadlessBleClient extends NiimbotAbstractClient {
       await periph.disconnectAsync();
       throw new Error("Unable to find suitable channel characteristic");
     }
+
+    periph.on("disconnect", () => {
+      this.stopHeartbeat();
+      this.emit("disconnect", new DisconnectEvent());
+      this.device = undefined;
+      this.channel = undefined;
+    });
 
     channelCharacteristic.on("read", (data: Buffer, isNotification: boolean) => {
       if (isNotification) this.processRawPacket(new Uint8Array(data));

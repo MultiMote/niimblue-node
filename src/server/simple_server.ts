@@ -1,15 +1,21 @@
 import http from "http";
 import { z } from "zod";
 
-type RouteResponse = [resp: unknown, code: number] | unknown;
-
-type RouteHandler = (request: http.IncomingMessage) => RouteResponse;
+type RouteHandler = (request: http.IncomingMessage) => unknown;
 
 type Route = {
   path: string;
   method?: "GET" | "POST";
   handler: RouteHandler;
 };
+
+export class RestError extends Error {
+  readonly status;
+  constructor(message: string, status: number = 500) {
+    super(message);
+    this.status = status;
+  }
+}
 
 export const writeObj = (response: http.ServerResponse, o: unknown, status: number = 200) => {
   response.setHeader("Content-Type", "application/json");
@@ -50,7 +56,7 @@ export const readBodyJson = async <T>(request: http.IncomingMessage, schema: z.Z
 };
 
 export class SimpleServer {
-  private routes: Route[] = [];
+  private readonly routes: Route[] = [];
   private corsEnabled: boolean = false;
 
   enableCors() {
@@ -105,14 +111,17 @@ export class SimpleServer {
       }
 
       const result = await route.handler(request);
+      writeObj(response, result, 200);
 
-      if (Array.isArray(result)) {
-        writeObj(response, result[0], result[1]);
-      } else {
-        writeObj(response, result, 200);
-      }
     } catch (e) {
-      writeObj(response, { error: `${e}` }, 500);
+      if (e instanceof z.ZodError) {
+        const error = e.issues.map((i) => `${i.path.join("→")}: ${i.message}`).join("\n");
+        writeObj(response, { error }, 400);
+      } else if (e instanceof RestError) {
+        writeObj(response, { error: e.message }, e.status);
+      } else {
+        writeObj(response, { error: `${e}` }, 500);
+      }
     }
   }
 
