@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: niimbluelib-headless server
+  title: niimblue-node server
   version: "1.0"
 
 servers:

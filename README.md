@@ -1,4 +1,4 @@
-## NiimBlueLib-Headless [![NPM](https://img.shields.io/npm/v/@mmote/niimbluelib-headless)](https://npmjs.com/package/@mmote/niimbluelib-headless)
+## niimblue-node [![NPM](https://img.shields.io/npm/v/@mmote/niimblue-node)](https://npmjs.com/package/@mmote/niimblue-node)
 
 [niimbluelib](https://github.com/MultiMote/niimbluelib) BLE and serial client implementations for non-browser use cases.
 
@@ -20,7 +20,7 @@ Usage example:
 Global (for cli usage):
 
 ```bash
-npm i -g @mmote/niimbluelib-headless
+npm i -g @mmote/niimblue-node
 ```
 
 [node-gyp](https://www.npmjs.com/package/node-gyp) is required to install [noble](https://www.npmjs.com/package/@abandonware/noble) dependency.
@@ -98,4 +98,4 @@ Enable debug logging, set host and port, enable CORS:
 niimblue-cli server -d -h 0.0.0.0 -p 5000 --cors
 ```
 
-[Server API docs](https://multimote.github.io/niimbluelib-headless/server/)
+[Server API docs](https://multimote.github.io/niimblue-node/server/)
