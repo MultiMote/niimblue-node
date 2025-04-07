@@ -72,7 +72,7 @@ D110 BLE:
 niimblue-cli print -d -t ble -a 26:03:03:c3:f9:11 -p D110 -o left label_15x30.png
 ```
 
-B1 serial, long parameter names (will resize image to fit 50x30 label keeping aspect ration):
+B1 serial, long parameter names (will resize image to fit 50x30 label, keeping aspect ratio):
 
 ```bash
 niimblue-cli print --debug --transport serial --address COM8 --print-task B1 --print-direction top --label-width 384 --label-height 240 label_15x30.png
