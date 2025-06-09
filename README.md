@@ -119,4 +119,4 @@ Enable debug logging, set host and port, enable CORS:
 niimblue-cli server -d -h 0.0.0.0 -p 5000 --cors
 ```
 
-[Server API docs](https://multimote.github.io/niimblue-node/server/)
+[Server API docs](https://niimnode-docs.pages.dev/server/)
