@@ -6,10 +6,18 @@ Command line interface, simple REST server are also included.
 
 Tested with:
 
+Windows:
+
 * Windows 10
 * Bluetooth adapter (TP-LINK UB500)
 * USB serial connection
 * Printers: B1, D110
+
+Mac:
+
+* macOS 15.5
+* Integrated Bluetooth adapter
+* Printer: D110
 
 Usage example:
 
@@ -31,6 +39,11 @@ Windows requirements:
 * [MS Build tools 2019+](https://visualstudio.microsoft.com/downloads/?q=build+tools)
   - C++ build tools with `Windows SDK >=22000` must be installed
 * Python 3
+
+Mac requirements:
+
+* [Xcode](https://apps.apple.com/ca/app/xcode/id497799835)
+* Permissions: Open "System Settings" → "Privacy & Security" → "Bluetooth" and then add your terminal to allowed applications.
 
 See [node-gyp](https://github.com/nodejs/node-gyp) and [noble](https://github.com/abandonware/noble) installation.
 
@@ -70,6 +83,14 @@ D110 BLE:
 
 ```bash
 niimblue-cli print -d -t ble -a 26:03:03:c3:f9:11 -p D110 -o left label_15x30.png
+```
+
+D110 BLE via name:
+
+_Connecting via the Bluetooth device name instead of address is required on macOS. Find the device name with `niimblue-cli scan -t ble`._
+
+```bash
+niimblue-cli print -d -t ble -a 'D110-XXXXXXXXXX' -p D110 -o left -w 192 -h 96 label_15x30.png
 ```
 
 B1 serial, long parameter names (will resize image to fit 50x30 label, keeping aspect ratio):

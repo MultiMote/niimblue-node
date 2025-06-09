@@ -28,7 +28,7 @@ program
   .addOption(
     new Option("-t, --transport <type>", "Transport").makeOptionMandatory().choices(["ble", "serial"] as TransportType[])
   )
-  .requiredOption("-a, --address <string>", "Device bluetooth address or serial port name/path")
+  .requiredOption("-a, --address <string>", "Device bluetooth address/name or serial port name/path")
   .action(cliPrinterInfo);
 
 program
@@ -48,7 +48,7 @@ program
   .addOption(
     new Option("-t, --transport <type>", "Transport").makeOptionMandatory().choices(["ble", "serial"] as TransportType[])
   )
-  .requiredOption("-a, --address <string>", "Device bluetooth address or serial port name/path")
+  .requiredOption("-a, --address <string>", "Device bluetooth address/name or serial port name/path")
   .addOption(new Option("-o, --print-direction <dir>", "Print direction").choices(["left", "top"] as PrintDirection[]))
   .addOption(new Option("-p, --print-task <type>", "Print task").choices(printTaskNames))
   .requiredOption("-l, --label-type <type number>", "Label type", intOption, 1)
@@ -97,7 +97,7 @@ program
   .addOption(
     new Option("-t, --transport <type>", "Transport").makeOptionMandatory().choices(["ble", "serial"] as TransportType[])
   )
-  .requiredOption("-a, --address <string>", "Device bluetooth address or serial port name/path")
+  .requiredOption("-a, --address <string>", "Device bluetooth address/name or serial port name/path")
   .requiredOption("-f, --file <path>", "Firmware path")
   .requiredOption("-n, --new-version <version>", "New firmware version")
   .action(cliFlashFirmware);
