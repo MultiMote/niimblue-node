@@ -64,7 +64,7 @@ program
       "fill",
       "inside",
       "outside",
-    ] as SharpImageFit[]).default("contain" as SharpImageFit)
+    ] as SharpImageFit[])
   )
   .addOption(
     new Option("-m, --image-position <dir>", "Image position while resizing (label-width and label-height must be set)").choices([
@@ -77,7 +77,7 @@ program
       "bottom",
       "left bottom",
       "left top",
-    ] as SharpImagePosition[]).default("centre" as SharpImagePosition)
+    ] as SharpImagePosition[])
   )
   .action(cliConnectAndPrintImageFile);
 

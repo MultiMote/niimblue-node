@@ -56,8 +56,8 @@ export interface PrintOptions {
   threshold: number;
   labelWidth?: number;
   labelHeight?: number;
-  imageFit: SharpImageFit;
-  imagePosition: SharpImagePosition;
+  imageFit?: SharpImageFit;
+  imagePosition?: SharpImagePosition;
   debug: boolean;
 }
 
@@ -77,8 +77,8 @@ export const cliConnectAndPrintImageFile = async (path: string, options: PrintOp
   if (options.labelWidth !== undefined && options.labelHeight !== undefined) {
     image = image.resize(options.labelWidth, options.labelHeight, {
       kernel: sharp.kernel.nearest,
-      fit: options.imageFit,
-      position: options.imagePosition,
+      fit: options.imageFit ?? "contain",
+      position: options.imagePosition ?? "centre",
       background: "#fff",
     });
   } else if(options.imageFit !== undefined || options.imagePosition !== undefined) {
