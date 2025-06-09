@@ -24,9 +24,9 @@ export class NiimbotHeadlessBleClient extends NiimbotAbstractClient {
     super();
   }
 
-  /** Set device mac address for connect */
+  /** Set device mac address or name for connect */
   public setAddress(address: string) {
-    this.addr = address.toLowerCase();
+    this.addr = address;
   }
 
   public static async waitAdapterReady(): Promise<void> {
@@ -88,7 +88,10 @@ export class NiimbotHeadlessBleClient extends NiimbotAbstractClient {
       let timer: NodeJS.Timeout | undefined;
 
       noble.on("discover", async (peripheral: noble.Peripheral) => {
-        if (peripheral.address === address) {
+        if (
+          peripheral.address === address.toLowerCase() ||
+          peripheral.advertisement.localName === address
+        ) {
           clearTimeout(timer);
           resolve(peripheral);
         }
@@ -155,7 +158,7 @@ export class NiimbotHeadlessBleClient extends NiimbotAbstractClient {
     await this.disconnect();
 
     if (!this.addr) {
-      throw new Error("Device address not set");
+      throw new Error("Device address or name not set");
     }
 
     await this.connectToDevice(this.addr);
