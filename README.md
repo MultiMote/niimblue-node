@@ -11,7 +11,7 @@ Windows:
 * Windows 10
 * Bluetooth adapter (TP-LINK UB500)
 * USB serial connection
-* Printers: B1, D110
+* Printers: B1, D110, B21_C2B, B21_PRO
 
 Mac:
 
@@ -101,6 +101,12 @@ B1 serial, long parameter names (will resize image to fit 50x30 label, keeping a
 niimblue-cli print --debug --transport serial --address COM8 --print-task B1 --print-direction top --label-width 384 --label-height 240 label_15x30.png
 ```
 
+B21_PRO BLE, long parameter names (will resize image to fit 50x30 300dpi label, don't keep aspect ratio):
+
+```bash
+niimblue-cli print --debug --transport ble --address c3:16:13:04:06:18 --print-task D110M_V4 --print-direction top --label-width 584 --label-height 354 --image-fit fill label_15x30.png
+```
+
 B1 firmware upgrade via serial:
 
 ```bash
@@ -120,5 +126,7 @@ Enable debug logging, set host and port, enable CORS:
 ```bash
 niimblue-cli server -d -h 0.0.0.0 -p 5000 --cors
 ```
+
+See [sharp docs](https://sharp.pixelplumbing.com/api-resize/) for image resize options.
 
 [Server API docs](https://niimnode-docs.pages.dev/server/)
