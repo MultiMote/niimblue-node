@@ -93,7 +93,7 @@ export const printImage = async (
     console.error(e);
   }
 
-  await client.abstraction.printEnd();
+  await printTask.printEnd();
 };
 
 export const loadImageFromBase64 = async (b64: string): Promise<sharp.Sharp> => {
