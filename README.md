@@ -19,6 +19,8 @@ Mac:
 * Integrated Bluetooth adapter
 * Printer: D110
 
+[Protocol tested with these models (niimbluelib repo)](https://github.com/MultiMote/niimbluelib/issues/1).
+
 Usage example:
 
 * [src/service.ts](src/service.ts)
