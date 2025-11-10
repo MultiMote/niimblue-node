@@ -98,26 +98,33 @@ export const cliConnectAndPrintImageFile = async (path: string, options: PrintOp
     console.log("Print task:", printTask);
   }
 
+  let status = 1;
+
   try {
     await printImage(client, printTask, encoded, {
       quantity: options.quantity,
       labelType: options.labelType,
       density: options.density,
     });
+    status = 0;
   } finally {
     await client.disconnect();
   }
 
-  process.exit(0);
+  process.exit(status);
 };
 
 export const cliScan = async (options: ScanOptions) => {
   if (options.transport === "ble") {
     const devices = await NiimbotHeadlessBleClient.scan(options.timeout);
-    devices.forEach((dev) => console.log(`${dev.address}: ${dev.name}`));
+    for (const dev of devices) {
+      console.log(`${dev.address}: ${dev.name}`);
+    }
   } else if (options.transport === "serial") {
     const devices = await NiimbotHeadlessSerialClient.scan();
-    devices.forEach((dev) => console.log(`${dev.address}: ${dev.name}`));
+    for (const dev of devices) {
+      console.log(`${dev.address}: ${dev.name}`)
+    }
   }
 
   process.exit(0);

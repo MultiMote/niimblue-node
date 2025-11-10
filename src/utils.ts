@@ -89,11 +89,9 @@ export const printImage = async (
     await printTask.printInit();
     await printTask.printPage(encoded, options.quantity ?? 1);
     await printTask.waitForFinished();
-  } catch (e) {
-    console.error(e);
+  } finally {
+    await printTask.printEnd();
   }
-
-  await printTask.printEnd();
 };
 
 export const loadImageFromBase64 = async (b64: string): Promise<sharp.Sharp> => {
