@@ -103,7 +103,18 @@ export class NiimbotHeadlessSerialClient extends NiimbotAbstractClient {
 
   public async disconnect() {
     this.stopHeartbeat();
-    this.device?.close();
+
+    if (this.device) {
+      return new Promise<void>((resolve, reject) => {
+        this.device!.close((e) => {
+          if (e) {
+            reject(e);
+          } else {
+            resolve();
+          }
+        });
+      });
+    }
   }
 
   public isConnected(): boolean {
