@@ -38,9 +38,9 @@
     "typescript": "^5.4.5"
   },
   "dependencies": {
-    "@abandonware/noble": "^1.9.2-26",
     "@commander-js/extra-typings": "^12.1.0",
     "@mmote/niimbluelib": "0.0.1-alpha.32",
+    "@stoprocent/noble": "^2.3.10",
     "async-mutex": "^0.5.0",
     "commander": "^12.1.0",
     "serialport": "^12.0.0",
