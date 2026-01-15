@@ -1,4 +1,4 @@
-import noble from "@abandonware/noble";
+import noble, { Peripheral, Characteristic, Service } from "@stoprocent/noble";
 
 import {
   ConnectEvent,
@@ -17,8 +17,8 @@ export interface ScanItem {
 
 export class NiimbotHeadlessBleClient extends NiimbotAbstractClient {
   private addr: string = "";
-  private device: noble.Peripheral | undefined;
-  private channel: noble.Characteristic | undefined;
+  private device: Peripheral | undefined;
+  private channel: Characteristic | undefined;
 
   constructor() {
     super();
@@ -29,65 +29,32 @@ export class NiimbotHeadlessBleClient extends NiimbotAbstractClient {
     this.addr = address;
   }
 
-  public static async waitAdapterReady(): Promise<void> {
-    if (noble._state === "poweredOn") {
-      return;
-    }
-
-    return new Promise((resolve, reject) => {
-      let timer: NodeJS.Timeout | undefined;
-
-      noble.on("stateChange", async (state) => {
-        clearTimeout(timer);
-
-        if (state === "poweredOn") {
-          resolve();
-        } else {
-          reject(new Error(`BLE state is ${state}`));
-        }
-      });
-
-      timer = setTimeout(() => {
-        reject(new Error("Can't init BLE"));
-      }, 5000);
-    });
-  }
-
   public static async scan(timeoutMs: number = 5000): Promise<ScanItem[]> {
-    await NiimbotHeadlessBleClient.waitAdapterReady();
+    const items: ScanItem[] = [];
 
-    return new Promise((resolve, reject) => {
-      const peripherals: ScanItem[] = [];
-      let timer: NodeJS.Timeout | undefined;
+    await noble.waitForPoweredOnAsync(5000);
 
-      noble.on("discover", async (peripheral: noble.Peripheral) => {
-        peripherals.push({
+    await noble.startScanningAsync([], false);
+
+    setTimeout(() => noble.stopScanningAsync(), timeoutMs ?? 5000);
+
+    for await (const peripheral of noble.discoverAsync()) {
+      items.push({
           address: peripheral.address,
           name: peripheral.advertisement.localName || "unknown",
-        });
       });
+    }
 
-      noble.startScanning([], false, (error?: Error) => {
-        if (error) {
-          clearTimeout(timer);
-          reject(error);
-        }
-      });
-
-      timer = setTimeout(() => {
-        noble.stopScanning();
-        resolve(peripherals);
-      }, timeoutMs ?? 5000);
-    });
+    return items;
   }
 
-  private async getDevice(address: string, timeoutMs: number = 5000): Promise<noble.Peripheral> {
-    await NiimbotHeadlessBleClient.waitAdapterReady();
+  private async getDevice(address: string, timeoutMs: number = 5000): Promise<Peripheral> {
+    await noble.waitForPoweredOnAsync(5000);
 
     return new Promise((resolve, reject) => {
       let timer: NodeJS.Timeout | undefined;
 
-      noble.on("discover", async (peripheral: noble.Peripheral) => {
+      noble.on("discover", async (peripheral: Peripheral) => {
         if (
           peripheral.address === address.toLowerCase() ||
           peripheral.advertisement.localName === address
@@ -112,9 +79,9 @@ export class NiimbotHeadlessBleClient extends NiimbotAbstractClient {
     const periph = await this.getDevice(address, timeoutMs);
     await periph.connectAsync();
 
-    const services: noble.Service[] = await periph.discoverServicesAsync();
+    const services: Service[] = await periph.discoverServicesAsync();
 
-    let channelCharacteristic: noble.Characteristic | undefined;
+    let channelCharacteristic: Characteristic | undefined;
 
     for (const service of services) {
       if (service.uuid.length < 5) {

@@ -33,7 +33,7 @@ Global (for cli usage):
 npm i -g @mmote/niimblue-node
 ```
 
-[node-gyp](https://www.npmjs.com/package/node-gyp) is required to install [noble](https://www.npmjs.com/package/@abandonware/noble) dependency.
+[node-gyp](https://www.npmjs.com/package/node-gyp) is required to install [noble](https://www.npmjs.com/package/@mmote/niimblue-node) dependency.
 It requires working compiler installed on your system.
 
 Windows requirements:
