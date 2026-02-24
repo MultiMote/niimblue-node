@@ -111,11 +111,11 @@ export class NiimbotHeadlessBleClient extends NiimbotAbstractClient {
       this.channel = undefined;
     });
 
-    channelCharacteristic.on("read", (data: Buffer, isNotification: boolean) => {
+    channelCharacteristic.on("data", (data: Buffer, isNotification: boolean) => {
       if (isNotification) this.processRawPacket(new Uint8Array(data));
     });
 
-    channelCharacteristic.subscribeAsync();
+    await channelCharacteristic.subscribeAsync();
 
     this.channel = channelCharacteristic;
     this.device = periph;
@@ -157,7 +157,6 @@ export class NiimbotHeadlessBleClient extends NiimbotAbstractClient {
 
     if (this.device !== undefined) {
       await this.device.disconnectAsync();
-      this.emit("disconnect", new DisconnectEvent());
     }
 
     this.device = undefined;
@@ -168,7 +167,7 @@ export class NiimbotHeadlessBleClient extends NiimbotAbstractClient {
     const send = async () => {
       if (!this.isConnected()) {
         this.disconnect();
-        throw new Error("Disconnected");
+        throw new Error("Not connected");
       }
 
       await Utils.sleep(this.packetIntervalMs);
