@@ -1,0 +1,128 @@
+name: Alpha release
+
+on:
+  workflow_dispatch:
+    inputs:
+      niimbluelib_version:
+        description: "Optional @mmote/niimbluelib alpha version to publish against"
+        required: false
+        type: string
+  schedule:
+    - cron: "17 9 * * *"
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: alpha-release
+  cancel-in-progress: false
+
+jobs:
+  publish-alpha:
+    name: Publish alpha package
+    runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      REQUESTED_NIIMBLUELIB_VERSION: ${{ github.event_name == 'workflow_dispatch' && inputs.niimbluelib_version || '' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          registry-url: "https://registry.npmjs.org"
+          cache: npm
+
+      - name: Dump runtime versions
+        run: |
+          node --version
+          npm --version
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Resolve niimbluelib alpha
+        id: niimbluelib
+        run: |
+          set -euo pipefail
+
+          if [ -n "$REQUESTED_NIIMBLUELIB_VERSION" ]; then
+            version="$REQUESTED_NIIMBLUELIB_VERSION"
+          else
+            version="$(npm view @mmote/niimbluelib versions --json | node -e '
+              let input = "";
+              process.stdin.on("data", (chunk) => input += chunk);
+              process.stdin.on("end", () => {
+                const versions = JSON.parse(input);
+                const latestAlpha = versions
+                  .filter((version) => /^0\.0\.1-alpha\.\d+$/.test(version))
+                  .sort((left, right) => Number(left.split(".").pop()) - Number(right.split(".").pop()))
+                  .pop();
+
+                if (!latestAlpha) {
+                  console.error("No @mmote/niimbluelib alpha versions found");
+                  process.exit(1);
+                }
+
+                console.log(latestAlpha);
+              });
+            ')"
+          fi
+
+          if ! printf '%s' "$version" | grep -Eq '^0\.0\.1-alpha\.[0-9]+$'; then
+            echo "Expected an @mmote/niimbluelib alpha version, got: $version" >&2
+            exit 1
+          fi
+
+          alpha_number="${version##*.}"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "alpha_number=$alpha_number" >> "$GITHUB_OUTPUT"
+          echo "Using @mmote/niimbluelib@$version"
+
+      - name: Build against niimbluelib alpha
+        run: |
+          npm pkg set "dependencies.@mmote/niimbluelib=^${{ steps.niimbluelib.outputs.version }}"
+          npm install
+          npm run build
+
+      - name: Resolve niimblue-node alpha
+        id: package
+        run: |
+          set -euo pipefail
+
+          version="$(node -e '
+            const pkg = require("./package.json");
+            const [major, minor, patch] = pkg.version.split("-")[0].split(".").map(Number);
+            const alpha = process.env.NIIMBLUELIB_ALPHA_NUMBER;
+            console.log(`${major}.${minor}.${patch + 1}-alpha.${alpha}`);
+          ')"
+
+          if npm view "@mmote/niimblue-node@$version" version >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "@mmote/niimblue-node@$version already exists; skipping publish"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "version=$version" >> "$GITHUB_OUTPUT"
+            echo "Publishing @mmote/niimblue-node@$version"
+          fi
+        env:
+          NIIMBLUELIB_ALPHA_NUMBER: ${{ steps.niimbluelib.outputs.alpha_number }}
+
+      - name: Stamp alpha package version
+        if: steps.package.outputs.exists == 'false'
+        run: npm version --no-git-tag-version "${{ steps.package.outputs.version }}"
+
+      - name: Verify npm token
+        if: steps.package.outputs.exists == 'false'
+        run: |
+          if [ -z "$NODE_AUTH_TOKEN" ]; then
+            echo "NPM_TOKEN secret is required to publish alpha packages" >&2
+            exit 1
+          fi
+
+      - name: Publish alpha package
+        if: steps.package.outputs.exists == 'false'
+        run: npm publish --tag alpha --access public --provenance
