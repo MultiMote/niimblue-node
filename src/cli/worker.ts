@@ -140,6 +140,19 @@ export const cliPrinterInfo = async (options: InfoOptions) => {
   process.exit(0);
 };
 
+export const cliPrinterRfidInfo = async (options: InfoOptions) => {
+  const client: NiimbotAbstractClient = initClient(options.transport, options.address, options.debug);
+  await client.connect();
+  console.log("Paper RFID info:", await client.abstraction.rfidInfo());
+  
+  try {
+    console.log("Ribbon RFID info:", await client.abstraction.rfidInfo2());
+  } catch (ignored) {}
+
+  await client.disconnect();
+  process.exit(0);
+};
+
 export const cliFlashFirmware = async (options: FirmwareOptions) => {
   const data: Uint8Array = fs.readFileSync(options.file);
 

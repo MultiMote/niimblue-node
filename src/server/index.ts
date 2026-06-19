@@ -22,6 +22,7 @@ export const cliStartServer = (options: ServerOptions) => {
   s.post("/disconnect", w.disconnect);
   s.get("/connected", w.connected);
   s.get("/info", w.info);
+  s.get("/rfid", w.rfid);
   s.post("/print", w.print);
   s.post("/scan", w.scan);
 

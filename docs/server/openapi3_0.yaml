@@ -89,7 +89,16 @@ paths:
               schema:
                 $ref: '#/components/schemas/PrinterInfo'
 
-
+  /rfid:
+    get:
+      summary: Check the printer RFID info
+      responses:
+        "200":
+          description: Connection status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrinterRfidInfo'
 
   /print:
     post:
@@ -308,3 +317,59 @@ components:
         - printerInfo
         - modelMetadata
         - detectedPrintTask
+
+    PrinterRfidInfo:
+      type: object
+      required:
+        - paperRfidInfo
+      properties:
+        paperRfidInfo:
+          type: object
+          required:
+            - tagPresent
+            - uuid
+            - barCode
+            - serialNumber
+            - allPaper
+            - usedPaper
+            - consumablesType
+          properties:
+            tagPresent:
+              type: boolean
+            uuid:
+              type: string
+            barCode:
+              type: string
+            serialNumber:
+              type: string
+            allPaper:
+              type: integer
+            usedPaper:
+              type: integer
+            consumablesType:
+              type: integer
+        ribbonRfidInfo:
+          type: object
+          required:
+            - tagPresent
+            - uuid
+            - barCode
+            - serialNumber
+            - allPaper
+            - usedPaper
+            - consumablesType
+          properties:
+            tagPresent:
+              type: boolean
+            uuid:
+              type: string
+            barCode:
+              type: string
+            serialNumber:
+              type: string
+            allPaper:
+              type: integer
+            usedPaper:
+              type: integer
+            consumablesType:
+              type: integer

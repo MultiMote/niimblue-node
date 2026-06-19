@@ -94,6 +94,19 @@ export const info = async () => {
   };
 };
 
+export const rfid = async () => {
+  assertConnected();
+
+  const paperRfidInfo = await client!.abstraction.rfidInfo();
+
+  let ribbonRfidInfo;
+  try {
+    ribbonRfidInfo = await client!.abstraction.rfidInfo2();
+  } catch (ignored) {}
+
+  return { paperRfidInfo, ribbonRfidInfo };
+};
+
 export const print = async (r: IncomingMessage) => {
   assertConnected();
 

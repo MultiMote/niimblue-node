@@ -6,6 +6,7 @@ import {
   cliConnectAndPrintImageFile,
   cliFlashFirmware,
   cliPrinterInfo,
+  cliPrinterRfidInfo,
   cliScan,
   SharpImageFit,
   SharpImagePosition,
@@ -30,6 +31,16 @@ program
   )
   .requiredOption("-a, --address <string>", "Device bluetooth address/name or serial port name/path")
   .action(cliPrinterInfo);
+
+program
+  .command("rfid")
+  .description("Printer RFID information")
+  .requiredOption("-d, --debug", "Debug information", false)
+  .addOption(
+    new Option("-t, --transport <type>", "Transport").makeOptionMandatory().choices(["ble", "serial"] as TransportType[])
+  )
+  .requiredOption("-a, --address <string>", "Device bluetooth address/name or serial port name/path")
+  .action(cliPrinterRfidInfo);
 
 program
   .command("scan")
