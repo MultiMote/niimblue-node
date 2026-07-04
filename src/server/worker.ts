@@ -36,8 +36,8 @@ const PrintSchema = z
     labelHeight: z.number().positive().optional(),
     threshold: z.number().min(1).max(255).default(128),
     imagePosition: z
-      .enum(["centre", "top", "right top", "right", "right bottom", "bottom", "left bottom", "left", "left top"])
-      .default("centre"),
+      .enum(["centre", "center", "top", "right top", "right", "right bottom", "bottom", "left bottom", "left", "left top"])
+      .default("center"),
     imageFit: z.enum(["contain", "cover", "fill", "inside", "outside"]).default("contain"),
   })
   .refine(

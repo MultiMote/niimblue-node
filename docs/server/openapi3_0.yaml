@@ -122,7 +122,7 @@ paths:
                   imageUrl: https://i.imgur.com/TzzVlc4.png
                   labelWidth: 344
                   labelHeight: 200
-                  imagePosition: centre
+                  imagePosition: center
                   imageFit: contain
                   threshold: 128
                   density: 3
@@ -247,8 +247,8 @@ components:
 
         imagePosition:
           type: string
-          enum: ["centre", "top", "right top", "right", "right bottom", "bottom", "left bottom", "left", "left top"]
-          default: centre
+          enum: ["center", "centre", "top", "right top", "right", "right bottom", "bottom", "left bottom", "left", "left top"]
+          default: center
           description: See [sharp resize options.position](https://sharp.pixelplumbing.com/api-resize)
 
         imageFit:

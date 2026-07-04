@@ -16,6 +16,7 @@ export type SharpImagePosition =
   | "left"
   | "top"
   | "centre"
+  | "center"
   | "right top"
   | "right"
   | "right bottom"
@@ -78,7 +79,7 @@ export const cliConnectAndPrintImageFile = async (path: string, options: PrintOp
     image = image.resize(options.labelWidth, options.labelHeight, {
       kernel: sharp.kernel.nearest,
       fit: options.imageFit ?? "contain",
-      position: options.imagePosition ?? "centre",
+      position: options.imagePosition ?? "center",
       background: "#fff",
     });
   } else if(options.imageFit !== undefined || options.imagePosition !== undefined) {
@@ -144,7 +145,7 @@ export const cliPrinterRfidInfo = async (options: InfoOptions) => {
   const client: NiimbotAbstractClient = initClient(options.transport, options.address, options.debug);
   await client.connect();
   console.log("Paper RFID info:", await client.abstraction.rfidInfo());
-  
+
   try {
     console.log("Ribbon RFID info:", await client.abstraction.rfidInfo2());
   } catch (ignored) {}

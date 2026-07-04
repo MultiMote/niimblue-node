@@ -82,6 +82,7 @@ program
       "left",
       "top",
       "centre",
+      "center",
       "right top",
       "right",
       "right bottom",
