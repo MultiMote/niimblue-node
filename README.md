@@ -1,8 +1,6 @@
 ## niimblue-node [![NPM](https://img.shields.io/npm/v/@mmote/niimblue-node)](https://npmjs.com/package/@mmote/niimblue-node)
 
-[niimbluelib](https://github.com/MultiMote/niimbluelib) BLE and serial client implementations for non-browser use cases.
-
-Command line interface, simple REST server are also included.
+[niimbluelib](https://github.com/MultiMote/niimbluelib) command line interface and simple REST server.
 
 Tested with:
 

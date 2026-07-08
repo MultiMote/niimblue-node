@@ -1,12 +1,18 @@
-import { LabelType, NiimbotAbstractClient, PrintDirection, PrintTaskName, printTaskNames } from "@mmote/niimbluelib";
+import {
+  LabelType,
+  NiimbotAbstractClient,
+  NiimbotNodeBleClient,
+  NiimbotNodeSerialClient,
+  PrintDirection,
+  PrintTaskName,
+  printTaskNames
+} from "@mmote/niimbluelib";
 import { IncomingMessage } from "http";
 import sharp from "sharp";
 import { z } from "zod";
-import { NiimbotHeadlessBleClient } from "../client/headless_ble_impl";
 import { ImageEncoder } from "../image_encoder";
 import { initClient, loadImageFromBase64, loadImageFromUrl, printImage } from "../utils";
 import { readBodyJson, RestError } from "./simple_server";
-import { NiimbotHeadlessSerialClient } from "../client/headless_serial_impl";
 
 let client: NiimbotAbstractClient | null = null;
 let debug: boolean = false;
@@ -163,9 +169,9 @@ export const scan = async (r: IncomingMessage) => {
   const options = await readBodyJson(r, ScanSchema);
 
   if (options.transport === "ble") {
-    return { devices: await NiimbotHeadlessBleClient.scan(options.timeout) };
+    return { devices: await NiimbotNodeBleClient.scan(options.timeout) };
   } else if (options.transport === "serial") {
-    return { devices: await NiimbotHeadlessSerialClient.scan() };
+    return { devices: await NiimbotNodeSerialClient.scan() };
   }
 
   throw new RestError("Invalid transport", 400);

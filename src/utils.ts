@@ -3,6 +3,8 @@ import {
   EncodedImage,
   LabelType,
   NiimbotAbstractClient,
+  NiimbotNodeBleClient,
+  NiimbotNodeSerialClient,
   PacketReceivedEvent,
   PacketSentEvent,
   PrintProgressEvent,
@@ -14,7 +16,6 @@ import {
 import fs from "fs";
 import sharp from "sharp";
 import { Readable } from "stream";
-import { NiimbotHeadlessBleClient, NiimbotHeadlessSerialClient } from ".";
 
 export type TransportType = "serial" | "ble";
 
@@ -27,10 +28,10 @@ export interface PrintOptions {
 export const initClient = (transport: TransportType, address: string, debug: boolean): NiimbotAbstractClient => {
   let client = null;
   if (transport === "serial") {
-    client = new NiimbotHeadlessSerialClient();
+    client = new NiimbotNodeSerialClient();
     client.setPort(address);
   } else if (transport === "ble") {
-    client = new NiimbotHeadlessBleClient();
+    client = new NiimbotNodeBleClient();
     client.setAddress(address);
   } else {
     throw new Error("Invalid transport");

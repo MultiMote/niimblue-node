@@ -1,7 +1,7 @@
 {
   "name": "@mmote/niimblue-node",
-  "version": "0.0.14",
-  "description": "Headless clients for niimbluelib. Command line interface, simple REST server are also included.",
+  "version": "1.0.0",
+  "description": "niimbluelib command line interface, simple REST server",
   "keywords": [
     "command-line",
     "thermal-printer",
@@ -39,12 +39,18 @@
   },
   "dependencies": {
     "@commander-js/extra-typings": "^12.1.0",
-    "@mmote/niimbluelib": "^0.0.1-alpha.40",
-    "@stoprocent/noble": "^2.3.10",
+    "@mmote/niimbluelib": "^0.0.1-alpha.41-node",
     "async-mutex": "^0.5.0",
     "commander": "^12.1.0",
-    "serialport": "^12.0.0",
     "sharp": "^0.33.5",
     "zod": "^3.23.8"
+  },
+  "allowScripts": {
+    "sharp@0.33.5": true,
+    "usb@2.18.0": true,
+    "@serialport/bindings-cpp@13.0.0": true,
+    "@serialport/bindings-cpp@12.0.1": true,
+    "@stoprocent/bluetooth-hci-socket@2.2.6": true,
+    "@stoprocent/noble@2.5.5": true
   }
 }
