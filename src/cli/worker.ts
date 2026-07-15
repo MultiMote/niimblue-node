@@ -122,7 +122,6 @@ export const cliConnectAndPrintImageFile = async (paths: string[], options: Prin
 
   try {
     // Decode/encode all pages up front, then print them as a single multi-page task
-    // so the printer isn't re-initialized (and doesn't re-cut/re-calibrate) between files.
     const pages: Awaited<ReturnType<typeof ImageEncoder.encodeImage>>[] = [];
     let printTaskName: PrintTaskName | undefined;
 

@@ -50,7 +50,7 @@ export const readBodyJson = async <S extends z.ZodTypeAny>(
 
         const result = schema.safeParse(data);
         if (result.success) {
-          resolve(result.data as z.output<S>);   // cast is safe
+          resolve(result.data as z.output<S>);
         } else {
           reject(result.error);
         }

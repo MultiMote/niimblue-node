@@ -116,16 +116,6 @@ export const printImages = async (
   }
 };
 
-/** @deprecated Use {@link printImages} instead. Kept for backward compatibility. */
-export const printImage = async (
-  client: NiimbotAbstractClient,
-  printTaskName: PrintTaskName,
-  encoded: EncodedImage,
-  options: PrintOptions
-) => {
-  await printImages(client, printTaskName, [{ encoded }], options);
-};
-
 export const loadImageFromBase64 = async (b64: string): Promise<sharp.Sharp> => {
   const buf = Buffer.from(b64, "base64");
   const stream = Readable.from(buf);

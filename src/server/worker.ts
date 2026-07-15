@@ -63,7 +63,7 @@ const PrintSchema = z
   })
   .refine(
     ({ imageUrl, imageBase64, pages }) => {
-      // Either the legacy single-image shape, or the new `pages` array, must be provided (not both).
+      // Either the single-image shape, or the `pages` array, must be provided (not both).
       const hasSingleImage = !!imageUrl || !!imageBase64;
       const hasPages = !!pages;
       return hasSingleImage !== hasPages;
@@ -186,8 +186,6 @@ export const print = async (r: IncomingMessage) => {
     console.log("Print task:", printTask);
   }
 
-  // Normalize both the legacy single-image shape and the new `pages` array
-  // into a single list of pages to be printed as one multi-page job.
   const pageInputs = options.pages ?? [{ imageBase64: options.imageBase64, imageUrl: options.imageUrl, quantity: options.quantity }];
 
   const pages: PrintPage[] = [];
@@ -209,7 +207,6 @@ export const print = async (r: IncomingMessage) => {
     return { message: "Printed" };
   }
 
-  // Fire-and-forget: don't block the HTTP response on the printer finishing.
   printJob.catch((err) => {
     console.error("Print job failed:", err instanceof Error ? err.message : err);
   });
