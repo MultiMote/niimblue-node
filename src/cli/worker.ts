@@ -10,7 +10,7 @@ import {
 import fs from "fs";
 import sharp from "sharp";
 import { ImageEncoder } from "..";
-import { initClient, loadImageFromFile, printImage, TransportType } from "../utils";
+import { initClient, loadImageFromFile, printImages, TransportType } from "../utils";
 import { InvalidArgumentError } from "@commander-js/extra-typings";
 
 export type SharpImageFit = "contain" | "cover" | "fill" | "inside" | "outside";
@@ -64,15 +64,11 @@ export interface PrintOptions {
   debug: boolean;
 }
 
-export const cliConnectAndPrintImageFile = async (path: string, options: PrintOptions & TransportOptions) => {
-  const client: NiimbotAbstractClient = initClient(options.transport, options.address, options.debug);
-
-  if (options.debug) {
-    console.log("Connecting to", options.transport, options.address);
-  }
-
-  await client.connect();
-
+const encodeSingleImage = async (
+  client: NiimbotAbstractClient,
+  path: string,
+  options: PrintOptions
+): Promise<{ encoded: Awaited<ReturnType<typeof ImageEncoder.encodeImage>>; printTask: PrintTaskName }> => {
   let image: sharp.Sharp = await loadImageFromFile(path);
 
   image = image.flatten({ background: "#fff" }).threshold(options.threshold);
@@ -84,32 +80,87 @@ export const cliConnectAndPrintImageFile = async (path: string, options: PrintOp
       position: options.imagePosition ?? "center",
       background: "#fff",
     });
-  } else if(options.imageFit !== undefined || options.imagePosition !== undefined) {
+  } else if (options.imageFit !== undefined || options.imagePosition !== undefined) {
     throw new InvalidArgumentError("label-width and label-height must be set");
   }
 
   const printDirection: PrintDirection | undefined = options.printDirection ?? client.getModelMetadata()?.printDirection;
   const printTask: PrintTaskName | undefined = options.printTask ?? client.getPrintTaskType();
 
-  const encoded = await ImageEncoder.encodeImage(image, printDirection);
-
   if (printTask === undefined) {
     throw new Error("Unable to detect print task, please set it manually");
   }
 
-  if (options.debug) {
-    console.log("Print task:", printTask);
+  const encoded = await ImageEncoder.encodeImage(image, printDirection);
+
+  return { encoded, printTask };
+};
+
+export const cliConnectAndPrintImageFile = async (paths: string[], options: PrintOptions & TransportOptions) => {
+  if (paths.length === 0) {
+    console.error("Error: No files provided");
+    process.exit(1);
   }
 
-  let status = 1;
+  const missing = paths.filter((p) => !fs.existsSync(p));
+  if (missing.length > 0) {
+    for (const m of missing) {
+      console.error(`Error: File not found: ${m}`);
+    }
+    process.exit(1);
+  }
+
+  const client: NiimbotAbstractClient = initClient(options.transport, options.address, options.debug);
+
+  if (options.debug) {
+    console.log("Connecting to", options.transport, options.address);
+  }
+
+  await client.connect();
+
+  let status = 0;
 
   try {
-    await printImage(client, printTask, encoded, {
-      quantity: options.quantity,
-      labelType: options.labelType,
-      density: options.density,
-    });
-    status = 0;
+    // Decode/encode all pages up front, then print them as a single multi-page task
+    const pages: Awaited<ReturnType<typeof ImageEncoder.encodeImage>>[] = [];
+    let printTaskName: PrintTaskName | undefined;
+
+    for (let i = 0; i < paths.length; i++) {
+      const path = paths[i];
+
+      if (paths.length > 1) {
+        console.log(`Encoding file ${i + 1}/${paths.length}: ${path}`);
+      }
+
+      const { encoded, printTask } = await encodeSingleImage(client, path, options);
+
+      if (printTaskName === undefined) {
+        printTaskName = printTask;
+        if (options.debug) {
+          console.log("Print task:", printTaskName);
+        }
+      }
+
+      pages.push(encoded);
+    }
+
+    if (printTaskName === undefined) {
+      throw new Error("Unable to detect print task, please set it manually");
+    }
+
+    await printImages(
+      client,
+      printTaskName,
+      pages.map((encoded) => ({ encoded })),
+      {
+        quantity: options.quantity,
+        labelType: options.labelType,
+        density: options.density,
+      }
+    );
+  } catch (err) {
+    console.error("Error printing:", err instanceof Error ? err.message : err);
+    status = 1;
   } finally {
     await client.disconnect();
   }

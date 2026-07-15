@@ -11,7 +11,7 @@ import { IncomingMessage } from "http";
 import sharp from "sharp";
 import { z } from "zod";
 import { ImageEncoder } from "../image_encoder";
-import { initClient, loadImageFromBase64, loadImageFromUrl, printImage } from "../utils";
+import { initClient, loadImageFromBase64, loadImageFromUrl, printImages, PrintPage } from "../utils";
 import { readBodyJson, RestError } from "./simple_server";
 
 let client: NiimbotAbstractClient | null = null;
@@ -29,6 +29,19 @@ const ScanSchema = z.object({
 
 const [firstTask, ...otherTasks] = printTaskNames;
 
+const PageSchema = z
+  .object({
+    imageBase64: z.string().optional(),
+    imageUrl: z.string().optional(),
+    quantity: z.number().min(1).optional(),
+  })
+  .refine(
+    ({ imageUrl, imageBase64 }) => {
+      return !!imageUrl !== !!imageBase64;
+    },
+    { message: "imageUrl or imageBase64 must be defined", path: ["image"] }
+  );
+
 const PrintSchema = z
   .object({
     printDirection: z.enum(["left", "top"]).optional(),
@@ -38,6 +51,7 @@ const PrintSchema = z
     density: z.number().min(1).default(3),
     imageBase64: z.string().optional(),
     imageUrl: z.string().optional(),
+    pages: z.array(PageSchema).min(1).optional(),
     labelWidth: z.number().positive().optional(),
     labelHeight: z.number().positive().optional(),
     threshold: z.number().min(1).max(255).default(128),
@@ -45,12 +59,26 @@ const PrintSchema = z
       .enum(["centre", "center", "top", "right top", "right", "right bottom", "bottom", "left bottom", "left", "left top"])
       .default("center"),
     imageFit: z.enum(["contain", "cover", "fill", "inside", "outside"]).default("contain"),
+    waitUntilFinished: z.boolean().default(true),
   })
   .refine(
+    ({ imageUrl, imageBase64, pages }) => {
+      // Either the single-image shape, or the `pages` array, must be provided (not both).
+      const hasSingleImage = !!imageUrl || !!imageBase64;
+      const hasPages = !!pages;
+      return hasSingleImage !== hasPages;
+    },
+    { message: "Provide either imageUrl/imageBase64 or pages, but not both", path: ["image"] }
+  )
+  .refine(
     ({ imageUrl, imageBase64 }) => {
+      if (!imageUrl && !imageBase64) {
+        // handled by the pages branch above
+        return true;
+      }
       return !!imageUrl !== !!imageBase64;
     },
-    { message: "imageUrl or imageBase64 must be defined", path: ["image"] }
+    { message: "imageUrl or imageBase64 must be defined, not both", path: ["image"] }
   );
 
 export const setDebug = (v: boolean): void => {
@@ -113,17 +141,17 @@ export const rfid = async () => {
   return { paperRfidInfo, ribbonRfidInfo };
 };
 
-export const print = async (r: IncomingMessage) => {
-  assertConnected();
-
-  const options = await readBodyJson(r, PrintSchema);
-
+const prepareImage = async (
+  options: z.infer<typeof PrintSchema>,
+  imageBase64: string | undefined,
+  imageUrl: string | undefined
+): Promise<sharp.Sharp> => {
   let image: sharp.Sharp;
 
-  if (options.imageBase64 !== undefined) {
-    image = await loadImageFromBase64(options.imageBase64);
-  } else if (options.imageUrl !== undefined) {
-    image = await loadImageFromUrl(options.imageUrl);
+  if (imageBase64 !== undefined) {
+    image = await loadImageFromBase64(imageBase64);
+  } else if (imageUrl !== undefined) {
+    image = await loadImageFromUrl(imageUrl);
   } else {
     throw new RestError("Image is not defined", 400);
   }
@@ -139,14 +167,16 @@ export const print = async (r: IncomingMessage) => {
     });
   }
 
-  image = image.threshold(options.threshold);
+  return image.threshold(options.threshold);
+};
 
-  // await image.toFile("tmp.png");
+export const print = async (r: IncomingMessage) => {
+  assertConnected();
+
+  const options = await readBodyJson(r, PrintSchema);
 
   const printDirection: PrintDirection | undefined = options.printDirection ?? client!.getModelMetadata()?.printDirection;
   const printTask: PrintTaskName | undefined = options.printTask ?? client!.getPrintTaskType();
-
-  const encoded = await ImageEncoder.encodeImage(image, printDirection);
 
   if (printTask === undefined) {
     throw new RestError("Unable to detect print task, please set it manually", 400);
@@ -156,13 +186,32 @@ export const print = async (r: IncomingMessage) => {
     console.log("Print task:", printTask);
   }
 
-  await printImage(client!, printTask, encoded, {
+  const pageInputs = options.pages ?? [{ imageBase64: options.imageBase64, imageUrl: options.imageUrl, quantity: options.quantity }];
+
+  const pages: PrintPage[] = [];
+
+  for (const p of pageInputs) {
+    const image = await prepareImage(options, p.imageBase64, p.imageUrl);
+    const encoded = await ImageEncoder.encodeImage(image, printDirection);
+    pages.push({ encoded, quantity: p.quantity });
+  }
+
+  const printJob = printImages(client!, printTask, pages, {
     quantity: options.quantity,
     labelType: options.labelType,
     density: options.density,
   });
 
-  return { message: "Printed" };
+  if (options.waitUntilFinished) {
+    await printJob;
+    return { message: "Printed" };
+  }
+
+  printJob.catch((err) => {
+    console.error("Print job failed:", err instanceof Error ? err.message : err);
+  });
+
+  return { message: "Print job submitted" };
 };
 
 export const scan = async (r: IncomingMessage) => {
