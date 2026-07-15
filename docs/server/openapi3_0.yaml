@@ -46,6 +46,7 @@ paths:
                   $ref: "#/components/schemas/SimpleResponse"
         "500":
             description: Connection failure
+
   /disconnect:
     post:
       summary: Disconnect from the printer
@@ -78,6 +79,7 @@ paths:
                 properties:
                   connected:
                     type: boolean
+
   /info:
     get:
       summary: Check the printer info
@@ -102,7 +104,16 @@ paths:
 
   /print:
     post:
-      summary: Print image
+      summary: Print image(s)
+      description: >
+        Prints one or more images to the printer. This endpoint supports 
+        two payload structures:
+
+        1. Single-Image Mode: Supply a single image using the root-level 
+        `imageUrl` or `imageBase64` fields.
+
+        2. Multi-Page Mode: Use the `pages` array to send multiple distinct images 
+        in a single print job.
       requestBody:
         required: true
         content:
@@ -113,7 +124,8 @@ paths:
               Print base64 image:
                 value:
                   printDirection: top
-                  imageBase64: "iVBORw0KGgoAAAANSUhEUgAAAVgAAADICAAAAACIFqZrAAAA1GlDQ1BpY2MAABiVdZBBCwFBHMXfauPioMhBig9gSyk5kuKyHBaFXNZYS3bXNLubfC/fRPkMDs7O3koOWv/pP+/1b34zvQG0lSf8UO8CfhCpodVbzBfLeu6OPLIoooyaLUI5mgym+FvPG7REr0Zy1/9zqaVvnFBQL+y2kCqiPtjmKZL0Woe+dJhafXqTvuB7sfiwyat5J5hNqBV2FS4UbJxRxxox9vAQwaAGzJfONd/cGEcygrskrUi42JFtcBojhEPdcu5weTgnf/SbXdrK/qbKtFov/qczRp9clewAAAAJcEhZcwAACxIAAAsSAdLdfvwAAAIwSURBVHja7d3BTsJQEIZRx/D+rzxGpLRAoRpL/C+ebyGiLsxhHKQsbvWbntE7ArBgBfZpHY4fC8SOtYm1CkZdBdP86reVibUKwAosWLACCxaswIIFK7BgwQosWLACCxaswIIFK7BgwQosWLACCxaswIIFK7BgwQosWLACCxaswIIFK7BgwQosWLACCxaswIIFK7BgwQosWLACCxaswIIFK7BgweoJHSJ+izvHXo18/o2JBbs19Vmnvb0MbIWdo5exY3vB8yJHi73KxMad+pgxsdtow01xPGxNN724f706avmzGY9B+iqY/8SXz/oVvgfyYevmTj/+CtifuHbfjO/F/SVthzhH79h5Z/aM2sfP6uy3+HbS7Ob/u9WLm9VnrsySYe/BnYyzX0yM+wIh/CD4Uf6PvRzZutoTJnanOt7V9ViwgxW/Y0e9hjjmxNbVLdh9XZNlR4RdXh2MlU2G7UdyHb598ye2Vr/QW/Bgt0b2dIW7PluTrAePwR82wnteK2Bf5PNL2+li4vw9E7s9suuL4C17GYTv2Mv3A3pdMfL6YU0PevBz7LfffA14n/z8K4ywY3v3H7QKxg0sWLACCxaswIIFK7BgwQosWLACCxaswIIFK7BgwQosWLACCxaswIIFK7BgwQosWLACCxaswIIFK7BgwQosWLACCxaswIIFK7BgwQosWLACCxaswIIFK7BgwQosWLACm9/5dKTww99NrMA+tRr1bG0TC1Zgwf7fPgCwK0CxpUdwQgAAAABJRU5ErkJggg=="
+                  imageBase64: "iVBORw0KGgoAAAANSUhEUgAAAVgAAADICAAAAACIFqZrAAAA1GlDQ1BpY2MAABiVdZBBCwFBHMXfauPioMhBig9gSyk5kuKyHBaFXNZYS3bXNLubfC/fRPkMDs7O3koOWv/pP+/1b34zvQG0lSf8UO8CfhCpodVbzBfLeu6OPLIoooyaLUI5mgym+FvPG7REr0Zy1/9zqaVvnFBQL+y2kCqiPtjmKZL0Woe+dJhafXqTvuB7sfiwyat5J5hNqBV2FS4UbJxRxxox9vAQwaAGzJfONd/cGEcygrskrUi42JFtcBojhEPdcu5weTgnf/SbXdrK/qbKtFov/qczRp9clewAAAAJcEhZcwAACxIAAAsSAdLdfvwAAAIwSURBVHja7d3BTsJQEIZRx/D+rzxGpLRAoRpL/C+ebyGiLsxhHKQsbvWbntE7ArBgBfZpHY4fC8SOtYm1CkZdBdP86reVibUKwAosWLACCxaswIIFK7BgwQosWLACCxaswIIFK7BgwQosWLACCxaswIIFK7BgwQosWLACCxaswIIFK7BgwQosWLACCxaswIIFK7BgwQosWLACCxaswIIFK7BgwQosWLACm9/hdKTww99NrMA+tRr1bG0TC1Zgwf7fPgCwK0CxpUdwQgAAAABJRU5ErkJggg=="
+
               Print from url:
                 value:
                   quantity: 1
@@ -126,6 +138,19 @@ paths:
                   imageFit: contain
                   threshold: 128
                   density: 3
+
+              Print multiple pages:
+                value:
+                  printDirection: left
+                  printTask: B1
+                  density: 3
+                  labelType: 1
+                  quantity: 1
+                  pages:
+                    - imageUrl: https://i.imgur.com/TzzVlc4.png
+                      quantity: 2
+                    - imageBase64: "iVBORw0KGgoAAAANSUhEUgAAAVgAAADICAAAAACIFqZrAAAA..."
+                      quantity: 1
 
       responses:
         "200":
@@ -176,7 +201,6 @@ paths:
                 required:
                   - devices
 
-
 components:
   schemas:
     SimpleResponse:
@@ -187,8 +211,30 @@ components:
         message:
           type: string
 
+    PageObject:
+      type: object
+      description: A single page to be printed. Exactly one of imageUrl or imageBase64 must be provided.
+      properties:
+        imageBase64:
+          type: string
+          format: byte
+          description: Base64-encoded image data.
+        imageUrl:
+          type: string
+          format: uri
+          description: Publicly accessible image URL.
+        quantity:
+          type: number
+          minimum: 1
+          description: How many copies of this page to print.
+      required: []
+
     PrintOptions:
       type: object
+      description: >
+        Print parameters. You must provide exactly one of:
+          - `imageUrl` or `imageBase64`, or
+          - `pages` (multi-page mode).
       properties:
         printDirection:
           type: string
@@ -198,11 +244,13 @@ components:
         printTask:
           type: string
           example: B1
+          description: Printer task type (if omitted, auto-detected).
 
         quantity:
           type: number
           minimum: 1
           default: 1
+          description: Global quantity applied to all pages unless overridden per page.
 
         labelType:
           type: number
@@ -217,27 +265,34 @@ components:
         imageBase64:
           type: string
           format: byte
-          default: null
-          description: imageUrl or imageBase64 must be defined
+          description: |
+            Image as base64-encoded string. Use either this or `imageUrl`.
 
         imageUrl:
           type: string
           format: uri
-          default: null
-          example: https://i.imgur.com/TzzVlc4.png
-          description: imageUrl or imageBase64 must be defined
+          description: |
+            Image URL. Use either this or `imageBase64`.
+
+        pages:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/PageObject"
+          description: |
+            Array of pages to print. Each page requires exactly one image source
+            (`imageUrl` or `imageBase64`) and can have its own `quantity`.
+            Cannot be combined with `imageUrl`/`imageBase64` fields.
 
         labelWidth:
-          description: Retrieved from image if not set
+          description: Label width in pixels (if omitted, the image's original width is used).
           type: number
           minimum: 8
-          default: null
 
         labelHeight:
-          description: Retrieved from image if not set
+          description: Label height in pixels (if omitted, the image's original height is used).
           type: number
           minimum: 8
-          default: null
 
         threshold:
           type: number
@@ -256,6 +311,11 @@ components:
           enum: ["contain", "cover", "fill", "inside", "outside"]
           default: contain
           description: See [sharp resize options.fit](https://sharp.pixelplumbing.com/api-resize)
+
+        waitUntilFinished:
+          type: boolean
+          default: true
+          description: If false, the HTTP response is returned immediately while the print job runs in the background.
 
     PrinterInfo:
       type: object
