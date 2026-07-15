@@ -54,7 +54,7 @@ program
 program
   .command("print")
   .description("Prints image")
-  .argument("<path>", "PNG image path")
+  .argument("<paths...>", "PNG image path(s). Multiple files, or a shell glob like *.png, will be printed in one session.")
   .requiredOption("-d, --debug", "Debug information", false)
   .addOption(
     new Option("-t, --transport <type>", "Transport").makeOptionMandatory().choices(["ble", "serial"] as TransportType[])

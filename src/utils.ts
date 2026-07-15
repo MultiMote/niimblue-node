@@ -25,6 +25,13 @@ export interface PrintOptions {
   density?: number;
 }
 
+/** One page of a multi-page print job. */
+export interface PrintPage {
+  encoded: EncodedImage;
+  /** How many copies of this page to print. Defaults to 1. */
+  quantity?: number;
+}
+
 export const initClient = (transport: TransportType, address: string, debug: boolean): NiimbotAbstractClient => {
   let client = null;
   if (transport === "serial") {
@@ -72,27 +79,51 @@ export const initClient = (transport: TransportType, address: string, debug: boo
   return client;
 };
 
-export const printImage = async (
+/**
+ * Prints one or more pages (images) as a single print task/job.
+ * Each page carries its own `quantity` (label copies), falling back to
+ * `options.quantity` (and finally 1) when not set on the page itself.
+ */
+export const printImages = async (
   client: NiimbotAbstractClient,
   printTaskName: PrintTaskName,
-  encoded: EncodedImage,
+  pages: PrintPage[],
   options: PrintOptions
 ) => {
+  const defaultQuantity = options.quantity ?? 1;
+  const resolvedPages = pages.map((p) => ({ encoded: p.encoded, quantity: p.quantity ?? defaultQuantity }));
+  const totalPages = resolvedPages.reduce((sum, p) => sum + p.quantity, 0);
+
   const printTask: AbstractPrintTask = client.abstraction.newPrintTask(printTaskName, {
     density: options.density ?? 3,
     labelType: options.labelType ?? LabelType.WithGaps,
-    totalPages: options.quantity ?? 1,
+    totalPages,
     statusPollIntervalMs: 500,
     statusTimeoutMs: 8_000,
   });
 
   try {
     await printTask.printInit();
-    await printTask.printPage(encoded, options.quantity ?? 1);
+
+    for (const page of resolvedPages) {
+      await printTask.printPage(page.encoded, page.quantity);
+      await printTask.waitForPageFinished();
+    }
+
     await printTask.waitForFinished();
   } finally {
     await printTask.printEnd();
   }
+};
+
+/** @deprecated Use {@link printImages} instead. Kept for backward compatibility. */
+export const printImage = async (
+  client: NiimbotAbstractClient,
+  printTaskName: PrintTaskName,
+  encoded: EncodedImage,
+  options: PrintOptions
+) => {
+  await printImages(client, printTaskName, [{ encoded }], options);
 };
 
 export const loadImageFromBase64 = async (b64: string): Promise<sharp.Sharp> => {

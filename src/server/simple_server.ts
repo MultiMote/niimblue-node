@@ -23,7 +23,10 @@ export const writeObj = (response: http.ServerResponse, o: unknown, status: numb
   response.end(JSON.stringify(o));
 };
 
-export const readBodyJson = async <T>(request: http.IncomingMessage, schema: z.ZodType<T>): Promise<T> => {
+export const readBodyJson = async <S extends z.ZodTypeAny>(
+  request: http.IncomingMessage,
+  schema: S
+): Promise<z.output<S>> => {
   return new Promise((resolve, reject) => {
     const bodyParts: any[] = [];
 
@@ -47,7 +50,7 @@ export const readBodyJson = async <T>(request: http.IncomingMessage, schema: z.Z
 
         const result = schema.safeParse(data);
         if (result.success) {
-          resolve(result.data);
+          resolve(result.data as z.output<S>);   // cast is safe
         } else {
           reject(result.error);
         }
