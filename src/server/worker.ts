@@ -8,7 +8,7 @@ import {
   printTaskNames
 } from "@mmote/niimbluelib";
 import { IncomingMessage } from "http";
-import sharp from "sharp";
+import sharp, { Sharp } from "sharp";
 import { z } from "zod";
 import { ImageEncoder } from "../image_encoder";
 import { initClient, loadImageFromBase64, loadImageFromUrl, printImages, PrintPage } from "../utils";
@@ -145,8 +145,8 @@ const prepareImage = async (
   options: z.infer<typeof PrintSchema>,
   imageBase64: string | undefined,
   imageUrl: string | undefined
-): Promise<sharp.Sharp> => {
-  let image: sharp.Sharp;
+): Promise<Sharp> => {
+  let image: Sharp;
 
   if (imageBase64 !== undefined) {
     image = await loadImageFromBase64(imageBase64);

@@ -14,7 +14,7 @@ import {
   Utils,
 } from "@mmote/niimbluelib";
 import fs from "fs";
-import sharp from "sharp";
+import sharp, { Sharp } from "sharp";
 import { Readable } from "stream";
 
 export type TransportType = "serial" | "ble";
@@ -116,13 +116,13 @@ export const printImages = async (
   }
 };
 
-export const loadImageFromBase64 = async (b64: string): Promise<sharp.Sharp> => {
+export const loadImageFromBase64 = async (b64: string): Promise<Sharp> => {
   const buf = Buffer.from(b64, "base64");
   const stream = Readable.from(buf);
   return stream.pipe(sharp());
 };
 
-export const loadImageFromUrl = async (url: string): Promise<sharp.Sharp> => {
+export const loadImageFromUrl = async (url: string): Promise<Sharp> => {
   const { body, ok, status } = await fetch(url);
 
   if (!ok) {
@@ -136,7 +136,7 @@ export const loadImageFromUrl = async (url: string): Promise<sharp.Sharp> => {
   return Readable.fromWeb(body).pipe(sharp());
 };
 
-export const loadImageFromFile = async (path: string): Promise<sharp.Sharp> => {
+export const loadImageFromFile = async (path: string): Promise<Sharp> => {
   const stream = fs.createReadStream(path);
   return stream.pipe(sharp());
 };

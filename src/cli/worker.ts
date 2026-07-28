@@ -8,7 +8,7 @@ import {
   PrintTaskName,
 } from "@mmote/niimbluelib";
 import fs from "fs";
-import sharp from "sharp";
+import sharp, { Sharp } from "sharp";
 import { ImageEncoder } from "..";
 import { initClient, loadImageFromFile, printImages, TransportType } from "../utils";
 import { InvalidArgumentError } from "@commander-js/extra-typings";
@@ -69,7 +69,7 @@ const encodeSingleImage = async (
   path: string,
   options: PrintOptions
 ): Promise<{ encoded: Awaited<ReturnType<typeof ImageEncoder.encodeImage>>; printTask: PrintTaskName }> => {
-  let image: sharp.Sharp = await loadImageFromFile(path);
+  let image: Sharp = await loadImageFromFile(path);
 
   image = image.flatten({ background: "#fff" }).threshold(options.threshold);
 

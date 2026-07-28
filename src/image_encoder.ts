@@ -1,8 +1,8 @@
 import { EncodedImage, ImageRow, PrintDirection, Utils } from "@mmote/niimbluelib";
-import sharp from "sharp";
+import { Sharp } from "sharp";
 
 export class ImageEncoder {
-  static async encodeImage(src: sharp.Sharp, printDirection: PrintDirection = "left"): Promise<EncodedImage> {
+  static async encodeImage(src: Sharp, printDirection: PrintDirection = "left"): Promise<EncodedImage> {
     const rowsData: ImageRow[] = [];
 
     const { data, info } = await src
