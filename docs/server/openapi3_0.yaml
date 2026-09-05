@@ -124,7 +124,7 @@ paths:
               Print base64 image:
                 value:
                   printDirection: top
-                  imageBase64: "iVBORw0KGgoAAAANSUhEUgAAAVgAAADICAAAAACIFqZrAAAA1GlDQ1BpY2MAABiVdZBBCwFBHMXfauPioMhBig9gSyk5kuKyHBaFXNZYS3bXNLubfC/fRPkMDs7O3koOWv/pP+/1b34zvQG0lSf8UO8CfhCpodVbzBfLeu6OPLIoooyaLUI5mgym+FvPG7REr0Zy1/9zqaVvnFBQL+y2kCqiPtjmKZL0Woe+dJhafXqTvuB7sfiwyat5J5hNqBV2FS4UbJxRxxox9vAQwaAGzJfONd/cGEcygrskrUi42JFtcBojhEPdcu5weTgnf/SbXdrK/qbKtFov/qczRp9clewAAAAJcEhZcwAACxIAAAsSAdLdfvwAAAIwSURBVHja7d3BTsJQEIZRx/D+rzxGpLRAoRpL/C+ebyGiLsxhHKQsbvWbntE7ArBgBfZpHY4fC8SOtYm1CkZdBdP86reVibUKwAosWLACCxaswIIFK7BgwQosWLACCxaswIIFK7BgwQosWLACCxaswIIFK7BgwQosWLACCxaswIIFK7BgwQosWLACCxaswIIFK7BgwQosWLACCxaswIIFK7BgwQosWLACm9/hdKTww99NrMA+tRr1bG0TC1Zgwf7fPgCwK0CxpUdwQgAAAABJRU5ErkJggg=="
+                  imageBase64: "iVBORw0KGgoAAAANSUhEUgAAAPAAAABgAQMAAAAZ/W2SAAAABlBMVEUAAAD///+l2Z/dAAAACXBIWXMAAFxGAABcRgEUlENBAAAB50lEQVRIx33Wu23EMAwGYCE3iBcJ4DKDZIoAQZSrUnoEjXJV4CrwCFeoUG24OBtRzPhtkhLp0t9BPumXKJpnozzv5geU59W0GhcmWlmjNX+VzN3EnczVxPLoo50YnMQtzOwlbhaO0tjlwlDkeYCVhdHrjYXRy43zo/ewc8hxOLjPxnHw/JkkDji5TtkjHlJ2iMcyjRrxtLw8asCcbKmK8Gh51ISh4lFT7njUlOmW2mdyMN1S+zqc7FnUjCOLmjEO/UgQsadRc440as7ny/OHmEP6Gcw9JEuAeZ8OWkDCdbL8hIckPMJrEDh6wmuMeONQbvm2ozyPSzYt5XnGZMsz9uzAMI7suDGGgh5Wzj6oHAuVe6dy8CoX9DikE3P6snhQFzXKvHxYjqTjVYpyxasU3UyWVynCLfAqRbgBXqUw76OO+WMw0JrGuaYVkXNJ6ynjnlVjxoHVcrn0HKMLhcvpZc+DWjQjqCV3/yNSwQ6glvueMr8stiUUr5qacHJRDZjTa259I1+SDeLMFdsiLlNe5qJc7xWozUEHamsxp6A1Jk5va/zGLs9xZbFhKxbOtnuf16eLXzjbLD5u9h5nHq3EUEycb1QfX5c7hImbPN9+79BbE0uZoTRDflKP6zQ4vJhvUJ43ozbgH//brYmxWw0+XgAAAABJRU5ErkJggg=="
 
               Print from url:
                 value:
@@ -149,7 +149,7 @@ paths:
                   pages:
                     - imageUrl: https://i.imgur.com/TzzVlc4.png
                       quantity: 2
-                    - imageBase64: "iVBORw0KGgoAAAANSUhEUgAAAVgAAADICAAAAACIFqZrAAAA1GlDQ1BpY2MAABiVdZBBCwFBHMXfauPioMhBig9gSyk5kuKyHBaFXNZYS3bXNLubfC/fRPkMDs7O3koOWv/pP+/1b34zvQG0lSf8UO8CfhCpodVbzBfLeu6OPLIoooyaLUI5mgym+FvPG7REr0Zy1/9zqaVvnFBQL+y2kCqiPtjmKZL0Woe+dJhafXqTvuB7sfiwyat5J5hNqBV2FS4UbJxRxxox9vAQwaAGzJfONd/cGEcygrskrUi42JFtcBojhEPdcu5weTgnf/SbXdrK/qbKtFov/qczRp9clewAAAAJcEhZcwAACxIAAAsSAdLdfvwAAAIwSURBVHja7d3BTsJQEIZRx/D+rzxGpLRAoRpL/C+ebyGiLsxhHKQsbvWbntE7ArBgBfZpHY4fC8SOtYm1CkZdBdP86reVibUKwAosWLACCxaswIIFK7BgwQosWLACCxaswIIFK7BgwQosWLACCxaswIIFK7BgwQosWLACCxaswIIFK7BgwQosWLACCxaswIIFK7BgwQosWLACCxaswIIFK7BgwQosWLACm9/hdKTww99NrMA+tRr1bG0TC1Zgwf7fPgCwK0CxpUdwQgAAAABJRU5ErkJggg=="
+                    - imageBase64: "iVBORw0KGgoAAAANSUhEUgAAAPAAAABgAQMAAAAZ/W2SAAAABlBMVEUAAAD///+l2Z/dAAAACXBIWXMAAFxGAABcRgEUlENBAAAB50lEQVRIx33Wu23EMAwGYCE3iBcJ4DKDZIoAQZSrUnoEjXJV4CrwCFeoUG24OBtRzPhtkhLp0t9BPumXKJpnozzv5geU59W0GhcmWlmjNX+VzN3EnczVxPLoo50YnMQtzOwlbhaO0tjlwlDkeYCVhdHrjYXRy43zo/ewc8hxOLjPxnHw/JkkDji5TtkjHlJ2iMcyjRrxtLw8asCcbKmK8Gh51ISh4lFT7njUlOmW2mdyMN1S+zqc7FnUjCOLmjEO/UgQsadRc440as7ny/OHmEP6Gcw9JEuAeZ8OWkDCdbL8hIckPMJrEDh6wmuMeONQbvm2ozyPSzYt5XnGZMsz9uzAMI7suDGGgh5Wzj6oHAuVe6dy8CoX9DikE3P6snhQFzXKvHxYjqTjVYpyxasU3UyWVynCLfAqRbgBXqUw76OO+WMw0JrGuaYVkXNJ6ynjnlVjxoHVcrn0HKMLhcvpZc+DWjQjqCV3/yNSwQ6glvueMr8stiUUr5qacHJRDZjTa259I1+SDeLMFdsiLlNe5qJc7xWozUEHamsxp6A1Jk5va/zGLs9xZbFhKxbOtnuf16eLXzjbLD5u9h5nHq3EUEycb1QfX5c7hImbPN9+79BbE0uZoTRDflKP6zQ4vJhvUJ43ozbgH//brYmxWw0+XgAAAABJRU5ErkJggg=="
                       quantity: 1
 
       responses:

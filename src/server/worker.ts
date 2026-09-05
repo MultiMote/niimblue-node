@@ -3,6 +3,7 @@ import {
   NiimbotAbstractClient,
   NiimbotNodeBleClient,
   NiimbotNodeSerialClient,
+  PageColorType,
   PrintDirection,
   PrintTaskName,
   printTaskNames
@@ -192,7 +193,7 @@ export const print = async (r: IncomingMessage) => {
 
   for (const p of pageInputs) {
     const image = await prepareImage(options, p.imageBase64, p.imageUrl);
-    const encoded = await ImageEncoder.encodeImage(image, printDirection);
+    const encoded = await ImageEncoder.encodeImage(image, PageColorType.SingleColor, printDirection); // todo: allow user to specify pageColor
     pages.push({ encoded, quantity: p.quantity });
   }
 

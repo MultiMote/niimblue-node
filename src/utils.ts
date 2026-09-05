@@ -7,6 +7,7 @@ import {
   NiimbotNodeSerialClient,
   PacketReceivedEvent,
   PacketSentEvent,
+  PageColorType,
   PrintProgressEvent,
   PrintTaskName,
   RequestCommandId,
@@ -90,9 +91,15 @@ export const printImages = async (
   pages: PrintPage[],
   options: PrintOptions
 ) => {
+  if (pages.length === 0) {
+    console.warn("No pages to print");
+    return;
+  }
+
   const defaultQuantity = options.quantity ?? 1;
   const resolvedPages = pages.map((p) => ({ encoded: p.encoded, quantity: p.quantity ?? defaultQuantity }));
   const totalPages = resolvedPages.reduce((sum, p) => sum + p.quantity, 0);
+  const pageColor: PageColorType = resolvedPages.at(0)!.encoded.pageColor;
 
   const printTask: AbstractPrintTask = client.abstraction.newPrintTask(printTaskName, {
     density: options.density ?? 3,
@@ -100,6 +107,7 @@ export const printImages = async (
     totalPages,
     statusPollIntervalMs: 500,
     statusTimeoutMs: 8_000,
+    pageColor,
   });
 
   try {

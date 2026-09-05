@@ -1,9 +1,11 @@
 import {
+  EncodedImage,
   FirmwareProgressEvent,
   LabelType,
   NiimbotAbstractClient,
   NiimbotNodeBleClient,
   NiimbotNodeSerialClient,
+  PageColorType,
   PrintDirection,
   PrintTaskName,
 } from "@mmote/niimbluelib";
@@ -68,7 +70,7 @@ const encodeSingleImage = async (
   client: NiimbotAbstractClient,
   path: string,
   options: PrintOptions
-): Promise<{ encoded: Awaited<ReturnType<typeof ImageEncoder.encodeImage>>; printTask: PrintTaskName }> => {
+): Promise<{ encoded: EncodedImage; printTask: PrintTaskName }> => {
   let image: Sharp = await loadImageFromFile(path);
 
   image = image.flatten({ background: "#fff" }).threshold(options.threshold);
@@ -91,7 +93,7 @@ const encodeSingleImage = async (
     throw new Error("Unable to detect print task, please set it manually");
   }
 
-  const encoded = await ImageEncoder.encodeImage(image, printDirection);
+  const encoded = await ImageEncoder.encodeImage(image, PageColorType.SingleColor, printDirection); // todo: allow user to specify pageColor
 
   return { encoded, printTask };
 };
@@ -122,7 +124,7 @@ export const cliConnectAndPrintImageFile = async (paths: string[], options: Prin
 
   try {
     // Decode/encode all pages up front, then print them as a single multi-page task
-    const pages: Awaited<ReturnType<typeof ImageEncoder.encodeImage>>[] = [];
+    const pages: Awaited<EncodedImage>[] = [];
     let printTaskName: PrintTaskName | undefined;
 
     for (let i = 0; i < paths.length; i++) {
