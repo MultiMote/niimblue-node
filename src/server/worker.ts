@@ -142,10 +142,7 @@ export const info = async () => {
 
 export const rfid = async () => {
   assertConnected();
-
-  const info = await client?.fetchRfidInfo();
-
-  return { paperRfidInfo: info?.paperInfo, ribbonRfidInfo: info?.ribbonRfidInfo, paperInfo: info?.paperInfo };
+  return await client?.fetchRfidInfo();
 };
 
 const prepareImage = async (
