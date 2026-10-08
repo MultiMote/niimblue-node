@@ -39,18 +39,17 @@
   },
   "dependencies": {
     "@commander-js/extra-typings": "^12.1.0",
-    "@mmote/niimbluelib": "0.0.1-alpha.44-node",
+    "@mmote/niimbluelib": "0.47.0-node",
     "async-mutex": "^0.5.0",
     "commander": "^12.1.0",
     "sharp": "^0.35.3",
     "zod": "^3.25.76"
   },
   "allowScripts": {
-    "sharp@0.35.3": true,
-    "usb@2.18.0": true,
-    "@serialport/bindings-cpp@13.0.0": true,
-    "@serialport/bindings-cpp@12.0.1": true,
-    "@stoprocent/bluetooth-hci-socket@2.2.6": true,
-    "@stoprocent/noble@2.5.5": true
+    "sharp": true,
+    "usb": true,
+    "@serialport/bindings-cpp": true,
+    "@stoprocent/bluetooth-hci-socket": true,
+    "@stoprocent/noble": true
   }
 }

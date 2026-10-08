@@ -16,7 +16,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: '25'
           registry-url: 'https://registry.npmjs.org'
           scope: '@mmote'
           cache: npm
@@ -29,6 +29,6 @@ jobs:
         run: npm run build
 
       - name: Publish
-        run: npm publish --access public
+        run: npm stage publish --access public --tag latest
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

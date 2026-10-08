@@ -101,7 +101,7 @@ export const printImages = async (
   const totalPages = resolvedPages.reduce((sum, p) => sum + p.quantity, 0);
   const pageColor: PageColorType = resolvedPages.at(0)!.encoded.pageColor;
 
-  const printTask: AbstractPrintTask = client.abstraction.newPrintTask(printTaskName, {
+  const printTask: AbstractPrintTask = client.protocol.newPrintTask(printTaskName, {
     density: options.density ?? 3,
     labelType: options.labelType ?? LabelType.WithGaps,
     totalPages,

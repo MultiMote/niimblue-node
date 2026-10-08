@@ -6,7 +6,7 @@ import {
   PageColorType,
   PrintDirection,
   PrintTaskName,
-  printTaskNames
+  printTaskNames,
 } from "@mmote/niimbluelib";
 import { IncomingMessage } from "http";
 import sharp, { Sharp } from "sharp";
@@ -40,7 +40,7 @@ const PageSchema = z
     ({ imageUrl, imageBase64 }) => {
       return !!imageUrl !== !!imageBase64;
     },
-    { message: "imageUrl or imageBase64 must be defined", path: ["image"] }
+    { message: "imageUrl or imageBase64 must be defined", path: ["image"] },
   );
 
 const PrintSchema = z
@@ -57,7 +57,18 @@ const PrintSchema = z
     labelHeight: z.number().positive().optional(),
     threshold: z.number().min(1).max(255).default(128),
     imagePosition: z
-      .enum(["centre", "center", "top", "right top", "right", "right bottom", "bottom", "left bottom", "left", "left top"])
+      .enum([
+        "centre",
+        "center",
+        "top",
+        "right top",
+        "right",
+        "right bottom",
+        "bottom",
+        "left bottom",
+        "left",
+        "left top",
+      ])
       .default("center"),
     imageFit: z.enum(["contain", "cover", "fill", "inside", "outside"]).default("contain"),
     waitUntilFinished: z.boolean().default(true),
@@ -69,7 +80,7 @@ const PrintSchema = z
       const hasPages = !!pages;
       return hasSingleImage !== hasPages;
     },
-    { message: "Provide either imageUrl/imageBase64 or pages, but not both", path: ["image"] }
+    { message: "Provide either imageUrl/imageBase64 or pages, but not both", path: ["image"] },
   )
   .refine(
     ({ imageUrl, imageBase64 }) => {
@@ -79,7 +90,7 @@ const PrintSchema = z
       }
       return !!imageUrl !== !!imageBase64;
     },
-    { message: "imageUrl or imageBase64 must be defined, not both", path: ["image"] }
+    { message: "imageUrl or imageBase64 must be defined, not both", path: ["image"] },
   );
 
 export const setDebug = (v: boolean): void => {
@@ -132,20 +143,15 @@ export const info = async () => {
 export const rfid = async () => {
   assertConnected();
 
-  const paperRfidInfo = await client!.abstraction.rfidInfo();
+  const info = await client?.fetchRfidInfo();
 
-  let ribbonRfidInfo;
-  try {
-    ribbonRfidInfo = await client!.abstraction.rfidInfo2();
-  } catch (ignored) {}
-
-  return { paperRfidInfo, ribbonRfidInfo };
+  return { paperRfidInfo: info?.paperInfo, ribbonRfidInfo: info?.ribbonRfidInfo, paperInfo: info?.paperInfo };
 };
 
 const prepareImage = async (
   options: z.infer<typeof PrintSchema>,
   imageBase64: string | undefined,
-  imageUrl: string | undefined
+  imageUrl: string | undefined,
 ): Promise<Sharp> => {
   let image: Sharp;
 
@@ -176,7 +182,8 @@ export const print = async (r: IncomingMessage) => {
 
   const options = await readBodyJson(r, PrintSchema);
 
-  const printDirection: PrintDirection | undefined = options.printDirection ?? client!.getModelMetadata()?.printDirection;
+  const printDirection: PrintDirection | undefined =
+    options.printDirection ?? client!.getModelMetadata()?.printDirection;
   const printTask: PrintTaskName | undefined = options.printTask ?? client!.getPrintTaskType();
 
   if (printTask === undefined) {
@@ -187,7 +194,9 @@ export const print = async (r: IncomingMessage) => {
     console.log("Print task:", printTask);
   }
 
-  const pageInputs = options.pages ?? [{ imageBase64: options.imageBase64, imageUrl: options.imageUrl, quantity: options.quantity }];
+  const pageInputs = options.pages ?? [
+    { imageBase64: options.imageBase64, imageUrl: options.imageUrl, quantity: options.quantity },
+  ];
 
   const pages: PrintPage[] = [];
 

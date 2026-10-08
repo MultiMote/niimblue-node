@@ -199,11 +199,8 @@ export const cliPrinterInfo = async (options: InfoOptions) => {
 export const cliPrinterRfidInfo = async (options: InfoOptions) => {
   const client: NiimbotAbstractClient = initClient(options.transport, options.address, options.debug);
   await client.connect();
-  console.log("Paper RFID info:", await client.abstraction.rfidInfo());
 
-  try {
-    console.log("Ribbon RFID info:", await client.abstraction.rfidInfo2());
-  } catch (ignored) {}
+  console.log("RFID info:", client.getRfidInfo());
 
   await client.disconnect();
   process.exit(0);
@@ -225,7 +222,7 @@ export const cliFlashFirmware = async (options: FirmwareOptions) => {
 
   try {
     console.log("Uploading firmware...");
-    await client.abstraction.firmwareUpgrade(data, options.newVersion);
+    await client.protocol.firmwareUpgrade(data, options.newVersion);
     console.log("Done, printer will shut down");
   } finally {
     client.off("firmwareprogress", listener);
